@@ -91,6 +91,26 @@ module.exports = class AbsRepo{
         });
     }
 
+    async searchPg(pg , criterio){
+        let db = await this.conexion();       
+        return new Promise((resolve, reject) => {
+            var collection = db.collection(this.getCollection());
+                collection.count( criterio, (err, count) => {
+                    collection.find(criterio).skip( (pg-1)*2 ).limit( 2 )
+                        .toArray( (err, result) => {    
+                            if (err) {
+                                resolve(null);
+                            } else {
+                                // lista
+                                result.total = count;
+                                resolve(result);
+                            }
+                            db.close();
+                        });
+                })
+            });       
+    }
+
     getCollection(){
         throw new Error('Metodo no disponible en clase abstracta');
     }
