@@ -236,7 +236,7 @@ module.exports = {
                                 usuario: usuarios[0].usuario,
                                 secreto : "secreto"
                             });
-                            respuesta = h.redirect('/misanuncios')
+                            respuesta = h.redirect('/')
 
                         }
                     })
