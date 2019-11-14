@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Wallapap</title>
+    <title>GESTO</title>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <link rel="stylesheet" href="/css/uikit.css"/>
@@ -45,44 +45,47 @@
     <div class="uk-container uk-container-expand">
         <nav class="uk-navbar" data-uk-navbar>
             <div class="uk-navbar-left">
-                <img width=30" height="30" src="images/uikit.svg" alt="">
-                <a class="uk-navbar-item uk-logo" href="/">Wallapap</a>
+                <a class="uk-navbar-item uk-logo" href="/">
+                    <img width=100" height="100" src="images/gesto/logo.png" alt="">
+                </a>
             </div>
 
+            {{#if usuarioAutenticado}}
             <div class="uk-navbar-right">
                 <!-- uk-visible@m Lo visualiza en pantallas más pequeñas de m-->
                 <ul class="uk-navbar-nav uk-visible@m">
                     <li>
-                        <a href="/seguidos">
+                        <a href="/torneos/inscrito">
                             <span data-uk-icon="heart"
                                   class="uk-margin-small-right">
-                            </span> Seguidos
+                            </span> Inscrito
                         </a>
                     </li>
                     <li>
-                        <a href="/misanuncios">
+                        <a href="/torneos/creados">
                             <span data-uk-icon="list"
                                   class="uk-margin-small-right">
-                            </span> Mis anuncios
+                            </span> Mis torneos
                         </a>
                     </li>
                 </ul>
                 <div class="uk-navbar-item">
-                    <a href="/publicar"
+                    <a href="/torneo/crear"
                        class="uk-button uk-button-primary uk-visible@m">
                         <span data-uk-icon="plus-circle"
                               class="uk-margin-small-right">
-                        </span>Publicar anuncio
+                        </span>Crear torneo
                     </a>
                 </div>
+                {{/if}}
 
                 {{#if usuarioAutenticado}}
-                <div class="uk-navbar-item">
+                <div class="uk-navbar-item uk-navbar-right">
                     <div class="uk-button uk-button-default uk-visible@m">
                          {{usuarioAutenticado}}
                     </div>
                 </div>
-                <div class="uk-navbar-item">
+                <div class="uk-navbar-item uk-navbar-right">
                     <a href="/desconectarse"
                        class="uk-button uk-button-danger uk-visible@m"> 
                         <span data-uk-icon="sign-out"
@@ -92,7 +95,7 @@
                 </div>
                 {{/if}}
                 {{^usuarioAutenticado}}
-                <div class="uk-navbar-item">
+                <div class="uk-navbar-item uk-navbar-right">
                     <a href="/login"
                        class="uk-button uk-button-default uk-visible@m">
                         <span data-uk-icon="sign-in"
