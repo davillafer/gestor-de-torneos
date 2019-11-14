@@ -5,24 +5,22 @@
             <table class="uk-table uk-table-hover uk-table-middle uk-table-divider">
                 <thead>
                 <tr>
-                    <th class="uk-table-expand">Titulo</th>
-                    <th class="uk-width-small">Precio</th>
+                    <th class="uk-table-expand">Nombre</th>
+                    <th class="uk-width-small">Inicio Inscripcion</th>
+                    <th class="uk-width-small">Fin</th>
                     <th class="uk-width-small">Opciones</th>
                 </tr>
                 </thead>
                 <tbody>
-                {{#each anuncios}}
+                {{#each torneos}}
                 <tr>
-                    <td >{{ titulo }}</td>
-                    <td >{{ precio }}</td>
-                    <td>
-                        <a class="uk-link" href="/anuncio/{{_id}}/modificar">
-                            <span  uk-icon="pencil"></span>
-                            Modificar
-                        </a> <br>
+                    <td >{{ nombre }}</td>
+                    <td >{{ inicioInscripcion }}</td>
+                    <td >{{ finInscripcion }}</td>
+                    <td>                        
                         <a class="uk-link" href="/anuncio/{{_id}}/eliminar">
                             <span  uk-icon="trash"></span>
-                            Eliminar
+                            Suspender
                         </a>
                     </td>
                 </tr>
@@ -35,7 +33,7 @@
             {{#each paginas}}
 
                 <li class="{{ clase }}">
-                    <a href="/misanuncios?pg={{valor}}">{{valor}}</a>
+                    <a href="/torneos/creados?pg={{valor}}">{{valor}}</a>
                 </li>
 
             {{/each}}

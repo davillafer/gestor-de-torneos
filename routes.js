@@ -280,7 +280,7 @@ module.exports = {
             },
             {
                 method: 'GET',
-                path: '/mistorneos',
+                path: '/torneos/creados',
                 options: {
                     auth: 'auth-registrado'
                 },
@@ -315,7 +315,7 @@ module.exports = {
                             paginas.push({valor: i});
                         }
                     }
-                    console.log('Torneos'+totalTorneos);
+                    
                     return h.view('mistorneos',
                         {
                             torneos: totalTorneos,
@@ -386,7 +386,7 @@ module.exports = {
                 method: 'GET',
                 path: '/',
                 handler: async (req, h) => {
-                    console.log(module.exports.getIdUsuarioIdentificado(req));
+                    
                     return h.view('index',
                         {
                             usuarioAutenticado: module.exports.getUsuarioIdentificado(req),
