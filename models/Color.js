@@ -1,4 +1,4 @@
-export default {
+module.exports =  {
 Rojo:1,
 Verde :2,
 Negro:3,

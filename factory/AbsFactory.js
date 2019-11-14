@@ -1,4 +1,4 @@
-export class AbsFactory{
+module.exports =  class AbsFactory{
     crearTorneo() {
         throw new Error('Metodo no disponible en clase abstracta');
     }

@@ -1,4 +1,4 @@
-export class Equipo {
+module.exports =  class Equipo {
     constructor(){
         this.id = null;
         this.nombre = null;

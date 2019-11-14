@@ -1,4 +1,4 @@
-export class TorneoFutbol{
+module.exports =  class TorneoFutbol{
     constructor(){
         this.id = null;
         this.nombre = null;

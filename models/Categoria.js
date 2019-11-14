@@ -1,4 +1,4 @@
-export default {
+module.exports =  {
 Chupetin:1,
 PreBenjamines :2,
 Benjamines:3,

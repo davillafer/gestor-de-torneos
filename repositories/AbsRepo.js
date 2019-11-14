@@ -95,4 +95,8 @@ module.exports = class AbsRepo{
         throw new Error('Metodo no disponible en clase abstracta');
     }
 
+    getEntity(){
+        throw new Error('Metodo no disponible en clase abstracta');
+    }
+
 }
