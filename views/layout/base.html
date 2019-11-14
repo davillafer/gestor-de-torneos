@@ -70,7 +70,7 @@
                     </li>
                 </ul>
                 <div class="uk-navbar-item">
-                    <a href="/torneo/crear"
+                    <a href="/torneos/crear"
                        class="uk-button uk-button-primary uk-visible@m">
                         <span data-uk-icon="plus-circle"
                               class="uk-margin-small-right">
@@ -128,27 +128,42 @@
         </button>
         <ul class="uk-nav uk-nav-default">
             <li class="uk-nav-header">Inicio</li>
+            {{#if usuarioAutenticado}}
             <li>
-                <a href="/seguidos">
+                <a href="/torneos/inscrito">
                     <span class="uk-margin-small-right uk-icon"
                           data-uk-icon="icon: heart">
-                    </span>Seguidos
+                    </span>Inscrito
                 </a>
             </li>
             <li>
-                <a href="/misanuncios">
+                <a href="/torneos/creados">
                     <span class="uk-margin-small-right uk-icon"
                           data-uk-icon="icon: list">
-                    </span>Mis anuncios
+                    </span>Mis torneos
                 </a>
             </li>
             <li>
-                <a href="/publicar">
+                <a href="/torneos/crear">
                     <span class="uk-margin-small-right uk-icon"
                           data-uk-icon="icon: plus-circle">
-                    </span>Publicar anuncio
+                    </span>Crear torneo
                 </a>
             </li>
+            {{/if}}
+            {{#if usuarioAutenticado}}
+            <li>
+                {{ usuarioAutenticado }}
+            </li>
+            <li>
+                <a href="/desconectarse">
+                    <span class="uk-margin-small-right uk-icon"
+                          data-uk-icon="icon: sign-in">
+                    </span>Desconectarse
+                </a>
+            </li>
+            {{/if}}
+            {{^usuarioAutenticado}}
             <li>
                 <a href="/login">
                     <span class="uk-margin-small-right uk-icon"
@@ -156,20 +171,7 @@
                     </span>Acceder
                 </a>
             </li>
-            <li class="uk-nav-header">Categorías</li>
-            <li><a href="/anuncios">Coches</a></li>
-            <li><a href="/anuncios">Motos</a></li>
-            <li><a href="/anuncios">Bicicletas</a></li>
-            <li><a href="/anuncios">Informática</a></li>
-            <li><a href="/anuncios">Teléfonos</a></li>
-            <li><a href="/anuncios">Tv, audio y foto</a></li>
-            <li><a href="/anuncios">Electrodomésticos</a></li>
-            <li><a href="/anuncios">Moda</a></li>
-            <li><a href="/anuncios">Coleccionismo</a></li>
-            <li><a href="/anuncios">Construcción</a></li>
-            <li><a href="/anuncios">Empleo</a></li>
-            <li><a href="/anuncios">Servicios</a></li>
-            <li><a href="/anuncios">Otros</a></li>
+            {{/usuarioAutenticado}}
         </ul>
     </div>
 </div>
