@@ -20,6 +20,15 @@ module.exports = {
             return null;
         }
     },
+    getIdUsuarioIdentificado(req){
+        if(req.auth.credentials !== null){
+            return req.auth.credentials;
+        }else if(req.state['session-id'] != null && req.state['session-id'].usuario !=""){
+            return req.state['session-id']; // TODO: Hay que sacar el id de la base de datos
+        }else{
+            return null;
+        }
+    },
     register: async (server, options) => {
         miserver = server;        
         equipoRepo = server.methods.getEquipoRepo();
@@ -271,7 +280,7 @@ module.exports = {
             },
             {
                 method: 'GET',
-                path: '/mistorneos',
+                path: '/torneos/creados',
                 options: {
                     auth: 'auth-registrado'
                 },
@@ -306,7 +315,7 @@ module.exports = {
                             paginas.push({valor: i});
                         }
                     }
-                    console.log('Torneos'+totalTorneos);
+                    
                     return h.view('mistorneos',
                         {
                             torneos: totalTorneos,
@@ -377,8 +386,12 @@ module.exports = {
                 method: 'GET',
                 path: '/',
                 handler: async (req, h) => {
+                    
                     return h.view('index',
-                        {  usuarioAutenticado: module.exports.getUsuarioIdentificado(req)},
+                        {
+                            usuarioAutenticado: module.exports.getUsuarioIdentificado(req),
+                            usuarioIdentificadoId: module.exports.getIdUsuarioIdentificado(req)
+                        },
                         { layout: 'base'});
                 }
             },{
