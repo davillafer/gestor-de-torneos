@@ -1,7 +1,7 @@
 module.exports = {
     conexion : async () => {
         var mongo = require("mongodb");
-        var db = "mongodb://admin:adoo4ever@clusteradoo-shard-00-00-zdxgm.mongodb.net:27017,clusteradoo-shard-00-01-zdxgm.mongodb.net:27017,clusteradoo-shard-00-02-zdxgm.mongodb.net:27017/test?ssl=true&replicaSet=ClusterADOO-shard-0&authSource=admin&retryWrites=true&w=majority";
+        var db = "mongodb://admin:adoo4ever@clusteradoo-shard-00-00-zdxgm.mongodb.net:27017,clusteradoo-shard-00-01-zdxgm.mongodb.net:27017,clusteradoo-shard-00-02-zdxgm.mongodb.net:27017/adoo_bd?ssl=true&replicaSet=ClusterADOO-shard-0&authSource=admin&retryWrites=true&w=majority";
         promise = new Promise((resolve, reject) => {
             mongo.MongoClient.connect(db, (err, db) => {
                 if (err) {
@@ -15,7 +15,7 @@ module.exports = {
     },
     obtenerUsuarios : async (db, criterio) => {
         promise = new Promise((resolve, reject) => {
-            var collection = db.collection('usuarios');
+            var collection = db.collection('Equipos');
             collection.find(criterio).toArray( (err, result) => {
                 if (err) {
                     resolve(null);
@@ -84,7 +84,7 @@ module.exports = {
     insertarUsuario : async (db, usuario) => {
 
         promise = new Promise((resolve, reject) => {
-            var collection = db.collection('usuarios');
+            var collection = db.collection('Equipos');
             collection.insert(usuario, (err, result) => {
                 if (err) {
                     resolve(null);

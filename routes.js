@@ -11,10 +11,19 @@ module.exports = {
             })
         })
     },
+    getUsuarioIdentificado(req){
+        if(req.auth.credentials !== null){
+            return req.auth.credentials;
+        }else if(req.state['session-id'] != null && req.state['session-id'].usuario !=""){
+            return req.state['session-id'].usuario;
+        }else{
+            return null;
+        }
+    },
     register: async (server, options) => {
         miserver = server;
         repositorio = server.methods.getRepositorio();
-
+        equipoRepo = server.methods.getEquipoRepo();
 
 
 
@@ -218,21 +227,20 @@ module.exports = {
 
                     // await no continuar hasta acabar esto
                     // Da valor a respuesta
-                    await repositorio.conexion()
-                        .then((db) => repositorio.obtenerUsuarios(db, usuarioBuscar))
-                        .then((usuarios) => {
-                            respuesta = "";
-                            if (usuarios == null || usuarios.length == 0 ) {
-                                respuesta =  h.redirect('/login?mensaje="Usuario o password incorrecto"')
-                            } else {
-                                req.cookieAuth.set({
-                                    usuario: usuarios[0].usuario,
-                                    secreto : "secreto"
-                                });
-                                respuesta = h.redirect('/misanuncios')
 
-                            }
-                        })
+                    await equipoRepo.search(usuarioBuscar).then((usuarios) => {
+                        respuesta = "";
+                        if (usuarios == null || usuarios.length == 0 ) {
+                            respuesta =  h.redirect('/login?mensaje="Usuario o password incorrecto"')
+                        } else {
+                            req.cookieAuth.set({
+                                usuario: usuarios[0].usuario,
+                                secreto : "secreto"
+                            });
+                            respuesta = h.redirect('/misanuncios')
+
+                        }
+                    })
                     return respuesta;
                 }
             },
@@ -375,8 +383,14 @@ module.exports = {
                 path: '/',
                 handler: async (req, h) => {
                     return h.view('index',
-                        { usuario: 'jordán'},
+                        {  usuarioAutenticado: module.exports.getUsuarioIdentificado(req)},
                         { layout: 'base'});
+                }
+            },{
+                method: 'GET',
+                path: '/api/',
+                handler: async (req, h) => {
+                    return  {usuarioAutenticado: module.exports.getUsuarioIdentificado(req)};
                 }
             }
         ])
