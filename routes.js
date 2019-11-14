@@ -21,8 +21,7 @@ module.exports = {
         }
     },
     register: async (server, options) => {
-        miserver = server;
-        repositorio = server.methods.getRepositorio();
+        miserver = server;        
         equipoRepo = server.methods.getEquipoRepo();
 
 
@@ -255,12 +254,8 @@ module.exports = {
                         usuario: req.payload.usuario,
                         password: password,
                     }
-
-                    // await no continuar hasta acabar esto
-                    // Da valor a respuesta
-                    await repositorio.conexion()
-                        .then((db) => repositorio.insertarUsuario(db, usuario))
-                        .then((id) => {
+                
+                    await equipoRepo.save(usuario).then((id) => {
                             respuesta = "";
                             if (id == null) {
                                 respuesta =  h.redirect('/registro?mensaje="Error al crear cuenta"')

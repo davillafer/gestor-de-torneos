@@ -4,7 +4,6 @@ const Inert = require('@hapi/inert');
 const Vision = require('@hapi/vision');
 const Cookie = require('@hapi/cookie');
 const routes = require("./routes.js");
-const repositorio = require("./repositorio.js");
 const EquipoRepo = require("./repositories/EquipoRepo");
 // Servidor
 const server = Hapi.server({
@@ -14,13 +13,6 @@ const server = Hapi.server({
 
 
 // declarar metodos comunes  
-server.method({
-    name: 'getRepositorio',
-    method: () => {
-        return repositorio;
-    },
-    options: {}
-});
 server.method({
     name:'getEquipoRepo',
     method: () => {

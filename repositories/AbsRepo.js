@@ -19,7 +19,7 @@ module.exports = class AbsRepo{
         let db = await this.conexion();
         return new Promise((resolve, reject) => {
             var collection = db.collection(this.getCollection());
-            collection.insert(entitie.serialize(), (err, result) => {
+            collection.insert(entitie, (err, result) => {
                 if (err) {
                     resolve(null);
                 } else {
@@ -49,7 +49,7 @@ module.exports = class AbsRepo{
         let db = await this.conexion();
         return new Promise((resolve, reject) => {
             var collection = db.collection(this.getCollection());
-            collection.update({"_id" :entitie.id}, {$set: entitie.serialize()}, (err, result) => {
+            collection.update({"_id" :entitie.id}, {$set: entitie}, (err, result) => {
                 if (err) {
                     resolve(null);
                 } else {
