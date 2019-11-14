@@ -8,4 +8,7 @@ module.exports =  class TorneoRepo extends AbsRepo{
     getEntity(){
         return FutbolFactory().crearTorneo();
     }
+
+    
+
 }

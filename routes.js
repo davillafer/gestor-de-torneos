@@ -23,6 +23,7 @@ module.exports = {
     register: async (server, options) => {
         miserver = server;        
         equipoRepo = server.methods.getEquipoRepo();
+        torneoRepo = server.methods.getTorneoRepo();
 
 
 
@@ -270,25 +271,24 @@ module.exports = {
             },
             {
                 method: 'GET',
-                path: '/misanuncios',
+                path: '/mistorneos',
                 options: {
                     auth: 'auth-registrado'
                 },
                 handler: async (req, h) => {
 
-                    var pg = parseInt(req.query.pg); // Es String !!!
+                    var pg = parseInt(req.query.pg); 
                     if ( req.query.pg == null){ // Puede no venir el param
                         pg = 1;
                     }
 
-                    var criterio = { "usuario" : req.auth.credentials };
+                    var criterio = { "creador" : req.auth.credentials };
                     // cookieAuth
 
-                    await repositorio.conexion()
-                        .then((db) => repositorio.obtenerAnunciosPg(db, pg, criterio))
-                        .then((anuncios, total) => {
-                            anunciosEjemplo = anuncios;
-                            pgUltima = anunciosEjemplo.total/2;
+                    await torneoRepo.searchPg(pg, criterio)
+                        .then((torneos, total) => {
+                             totalTorneos = torneos;
+                            pgUltima = totalTorneos.total/2;
 
                             // La págian 2.5 no existe
                             // Si excede sumar 1 y quitar los decimales
@@ -296,7 +296,6 @@ module.exports = {
                                 pgUltima = Math.trunc(pgUltima);
                                 pgUltima = pgUltima+1;
                             }
-
                         })
 
                     var paginas = [];
@@ -307,9 +306,10 @@ module.exports = {
                             paginas.push({valor: i});
                         }
                     }
-                    return h.view('misanuncios',
+                    console.log('Torneos'+totalTorneos);
+                    return h.view('mistorneos',
                         {
-                            anuncios: anunciosEjemplo,
+                            torneos: totalTorneos,
                             usuarioAutenticado: req.auth.credentials,
                             paginas : paginas
                         },

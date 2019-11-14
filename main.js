@@ -5,6 +5,7 @@ const Vision = require('@hapi/vision');
 const Cookie = require('@hapi/cookie');
 const routes = require("./routes.js");
 const EquipoRepo = require("./repositories/EquipoRepo");
+const TorneoRepo = require("./repositories/TorneoRepo");
 // Servidor
 const server = Hapi.server({
     port: 8080,
@@ -17,6 +18,14 @@ server.method({
     name:'getEquipoRepo',
     method: () => {
         return new EquipoRepo();
+    },
+    options: {}
+});
+
+server.method({
+    name:'getTorneoRepo',
+    method: () => {
+        return new TorneoRepo();
     },
     options: {}
 });
