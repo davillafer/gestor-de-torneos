@@ -275,12 +275,18 @@ module.exports = {
                 handler: async (req, h) => {
                     let respuesta;
 
+                    // Comprobar que ambas contraseñas son iguales
+                    if (req.payload.password !== req.payload.repassword)
+                        return h.redirect('/registro?mensaje="Passwords distintas"'); // Contraseña no salta, debe ser por la 'ñ'
+
                     let password = require('crypto').createHmac('sha256', 'secreto')
                         .update(req.payload.password).digest('hex');
 
                     let usuario = {
                         usuario: req.payload.usuario,
-                        password: password,
+                        nombre: req.payload.nombre,
+                        color: req.payload.color,
+                        password: password
                     }
 
                     await equipoRepo.search({'usuario': usuario.usuario}).then( async (result) => {
