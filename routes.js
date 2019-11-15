@@ -29,6 +29,22 @@ module.exports = {
             return null;
         }
     },
+    getFechaBonita(fecha){
+        if(!fecha instanceof Date){
+            return fecha;
+        }
+        let date = new Date();
+        if(date.getFullYear() === fecha.getFullYear() &&
+        date.getMonth() === fecha.getMonth() &&
+        date.getDate() === fecha.getDate()){
+            return "Hoy";
+        }       
+        else{
+            // 1/10/2019 - 18:53h 
+            return `${fecha.getDate()}/${fecha.getMonth()+1}/${fecha.getFullYear()}`;
+        }
+    },
+    
     register: async (server, options) => {
         miserver = server;        
         equipoRepo = server.methods.getEquipoRepo();
@@ -307,6 +323,12 @@ module.exports = {
                             }
                         })
 
+                    totalTorneos.forEach(torneo => {
+                        torneo.inicioInscripcion = module.exports.getFechaBonita(torneo.inicioInscripcion);
+                        torneo.finInscripcion = module.exports.getFechaBonita(torneo.finInscripcion);
+                    })
+
+
                     var paginas = [];
                     for( i=1; i <= pgUltima; i++){
                         if ( i == pg ){
@@ -316,7 +338,7 @@ module.exports = {
                         }
                     }
                     
-                    return h.view('mistorneos',
+                    return h.view('torneos/mistorneos',
                         {
                             torneos: totalTorneos,
                             usuarioAutenticado: req.auth.credentials,
