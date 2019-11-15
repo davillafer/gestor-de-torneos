@@ -15,11 +15,33 @@ module.exports = class AbsRepo{
         return promise;
     }
 
-    async save(entitie){
+    async saveUser(entity){
         let db = await this.conexion();
         return new Promise((resolve, reject) => {
             var collection = db.collection(this.getCollection());
-            collection.insert(entitie, (err, result) => {
+            collection.findOne({ "usuario": entity.usuario }, (err, existsOne) => {
+                if (err || existsOne !== null) {
+                    resolve(null);
+                } else {
+                    collection.insertOne(entity, (err, result) => {
+                        if (err) {
+                            resolve(null);
+                        } else {
+                            resolve(result.ops[0]._id.toString());
+                        }
+                        db.close();
+                    });
+                    db.close();
+                }
+            });
+        });
+    }
+
+    async save(entity){
+        let db = await this.conexion();
+        return new Promise((resolve, reject) => {
+            var collection = db.collection(this.getCollection());
+            collection.insertOne(entity, (err, result) => {
                 if (err) {
                     resolve(null);
                 } else {

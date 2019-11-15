@@ -265,7 +265,7 @@ module.exports = {
                         password: password,
                     }
                 
-                    await equipoRepo.save(usuario).then((id) => {
+                    await equipoRepo.saveUser(usuario).then((id) => {
                             respuesta = "";
                             if (id == null) {
                                 respuesta =  h.redirect('/registro?mensaje="Error al crear cuenta"')
