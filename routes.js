@@ -349,42 +349,32 @@ module.exports = {
             },
             {
                 method: 'GET',
-                path: '/anuncios',
+                path: '/torneos',
                 handler: async (req, h) => {
-
-
-                    anunciosEjemplo = [
-                        {titulo: "iphone", precio: 400},
-                        {titulo: "xBox", precio: 300},
-                        {titulo: "teclado", precio: 30},
-                    ]
 
                     var criterio = {};
                     if (req.query.criterio != null ){
-                        criterio = { "titulo" : {$regex : ".*"+req.query.criterio+".*"}};
+                        criterio = { "nombre" : {$regex : ".*"+req.query.criterio+".*"}};
                     }
-                    await repositorio.conexion()
-                        .then((db) => repositorio.obtenerAnuncios(db, criterio))
-                        .then((anuncios) => {
-                            anunciosEjemplo = anuncios;
+                    await torneoRepo.search(criterio)
+                        .then((torneos) => {
+                            totalTorneos = torneos;
                         })
 
                     // Recorte
-                    anunciosEjemplo.forEach( (e) => {
-                        if (e.titulo.length > 25){
-                            e.titulo =
-                                e.titulo.substring(0, 25) + "...";
+                    totalTorneos.forEach( (e) => {
+                        if (e.nombre.length > 25){
+                            e.nombre =
+                                e.nombre.substring(0, 25) + "...";
                         }
-                        if (e.descripcion.length > 80) {
-                            e.descripcion =
-                                e.descripcion.substring(0, 80) + "...";;
-                        }
+                         e.inicioInscripcion = module.exports.getFechaBonita(e.inicioInscripcion);
+                         e.finInscripcion= module.exports.getFechaBonita(e.finInscripcion);
                     });
 
-                    return h.view('anuncios',
-                        {
-                            usuario: 'jordán',
-                            anuncios: anunciosEjemplo
+                    return h.view('torneos/torneos',
+                        {                            
+                            torneos: totalTorneos,
+                            usuarioAutenticado : module.exports.getUsuarioIdentificado(req)
                         }, { layout: 'base'} );
                 }
             },
