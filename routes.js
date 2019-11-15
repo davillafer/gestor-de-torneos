@@ -41,6 +41,94 @@ module.exports = {
         server.route([
             {
                 method: 'GET',
+                path:
+                    '/torneos/{id}/ver',
+                options:
+                    {
+                        auth: 'auth-registrado'
+                    },
+                handler: async (req, h) => {
+
+
+                    var criterio = {"_id": require("mongodb").ObjectID(req.params.id)};
+                    var torneo;
+
+                    await repositorio.conexion()
+                        .then((db) => repositorio.obtenerFormularios(db, criterio))
+                        .then((torneos) => {
+                            torneo = torneos[0];
+                        });
+
+                    partidos = [];
+                    if (torneo.partidos == []){
+                        if (true){
+                            equipos = torneo.equipos;
+                            equiposLenght = equipos.length;
+                            equipoAnterior = undefined;
+                            for(i = 0; i < equiposLenght; i++){
+                                number = Math.floor(Math.random() * (equipos.length - 0)) + 0;
+                                if (equipoAnterior == undefined){
+                                    equipoAnterior = equipos[number];
+                                    equipos.splice(number, 1);
+                                } else {
+                                    partido = {
+                                        equipoLocal : equipoAnterior,
+                                        equipoVisitante : equipos[number]
+                                    }
+                                    equipos.splice(number, 1);
+                                    torneo.partidos.push(partido)
+                                }
+                            }
+
+
+                            auxTorneos = [];
+                            while(true){
+                                if (auxTorneos == []){
+                                    let half = Math.floor(torneo.partidos.length / 2);
+                                    partidos.push(torneo.partidos.slice(0, half));
+                                    auxTorneos = torneo.partidos.slice(half, torneo.partidos.length);
+                                } else {
+                                    let half = Math.floor(auxTorneos.length / 2);
+                                    partidos.push(auxTorneos.slice(0, half));
+                                    auxTorneos = auxTorneos.slice(half, auxTorneos.length);
+                                }
+                                if (auxTorneos.length == 1){
+                                    partidos.push(auxTorneos);
+                                    break;
+                                }
+                            }
+                        }
+
+                    } else {
+                        auxTorneos = [];
+                        while(true){
+                            if (auxTorneos == []){
+                                let half = Math.floor(torneo.partidos.length / 2);
+                                partidos.push(torneo.partidos.slice(0, half));
+                                auxTorneos = torneo.partidos.slice(half, torneo.partidos.length);
+                            } else {
+                                let half = Math.floor(auxTorneos.length / 2);
+                                partidos.push(auxTorneos.slice(0, half));
+                                auxTorneos = auxTorneos.slice(half, auxTorneos.length);
+                            }
+                            if (auxTorneos.length == 1){
+                                partidos.push(auxTorneos);
+                                break;
+                            }
+                        }
+                    }
+
+                    return h.view('torneos/ver',
+                        {
+                            torneo: torneo,
+                            partidos: partidos,
+                            usuarioAutenticado: req.state["session-id"].usuario,
+                        },
+                        {layout: 'base'});
+                }
+            },
+            {
+                method: 'GET',
                 path: '/anuncio/{id}/eliminar',
                 handler: async (req, h) => {
 
