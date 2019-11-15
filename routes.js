@@ -309,6 +309,39 @@ module.exports = {
             },
             {
                 method: 'GET',
+                path: '/perfil',
+                options: {
+                    auth: 'auth-registrado'
+                },
+                handler: async (req, h) => {
+                    // Obtenemos la información del usuario
+                    let user = await equipoRepo.search({ 'usuario': req.state['session-id'].usuario })
+                        .then( async result => {
+                            if (result) {
+                                return result;
+                            } else {
+                                return null;
+                            }
+                    });
+                    // Comprobamos si hay error
+                    if ( user ) {
+                        return h.view('usuario/perfil',
+                            { user },
+                            { layout: 'base'});
+                    } else {
+                        return h.redirect('/?mensaje="Ha ocurrido un error"');
+                    }
+                }
+            },
+            {
+                method: 'POST',
+                path: '/perfil',
+                handler: async (req, h) => {
+                    // TODO: modificar usuario
+                }
+            },
+            {
+                method: 'GET',
                 path: '/torneos/creados',
                 options: {
                     auth: 'auth-registrado'
