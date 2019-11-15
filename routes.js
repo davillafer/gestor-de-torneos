@@ -273,23 +273,30 @@ module.exports = {
                 method: 'POST',
                 path: '/registro',
                 handler: async (req, h) => {
-                    password = require('crypto').createHmac('sha256', 'secreto')
+                    let respuesta;
+
+                    let password = require('crypto').createHmac('sha256', 'secreto')
                         .update(req.payload.password).digest('hex');
 
-                    usuario = {
+                    let usuario = {
                         usuario: req.payload.usuario,
                         password: password,
                     }
-                
-                    await equipoRepo.saveUser(usuario).then((id) => {
-                            respuesta = "";
-                            if (id == null) {
-                                respuesta =  h.redirect('/registro?mensaje="Error al crear cuenta"')
-                            } else {
-                                respuesta = h.redirect('/login?mensaje="Usuario Creado"')
-                                idAnuncio = id;
-                            }
-                        })
+
+                    await equipoRepo.search({'usuario': usuario.usuario}).then( async (result) => {
+                       if (result.length !== 0) {
+                           respuesta =  h.redirect('/registro?mensaje="Usuario no disponible"');
+                       } else {
+                           await equipoRepo.save(usuario).then((id) => {
+                               respuesta = "";
+                               if (id == null) {
+                                   respuesta =  h.redirect('/registro?mensaje="Error al crear cuenta"')
+                               } else {
+                                   respuesta = h.redirect('/login?mensaje="Usuario Creado"');
+                               }
+                           });
+                       }
+                    });
 
                     return respuesta;
                 }
