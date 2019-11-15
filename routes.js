@@ -29,6 +29,22 @@ module.exports = {
             return null;
         }
     },
+    getFechaBonita(fecha){
+        if(!fecha instanceof Date){
+            return fecha;
+        }
+        let date = new Date();
+        if(date.getFullYear() === fecha.getFullYear() &&
+        date.getMonth() === fecha.getMonth() &&
+        date.getDate() === fecha.getDate()){
+            return "Hoy";
+        }       
+        else{
+            // 1/10/2019 - 18:53h 
+            return `${fecha.getDate()}/${fecha.getMonth()+1}/${fecha.getFullYear()}`;
+        }
+    },
+    
     register: async (server, options) => {
         miserver = server;        
         equipoRepo = server.methods.getEquipoRepo();
@@ -345,23 +361,36 @@ module.exports = {
                 method: 'POST',
                 path: '/registro',
                 handler: async (req, h) => {
-                    password = require('crypto').createHmac('sha256', 'secreto')
+                    let respuesta;
+
+                    // Comprobar que ambas contraseñas son iguales
+                    if (req.payload.password !== req.payload.repassword)
+                        return h.redirect('/registro?mensaje="Passwords distintas"'); // Contraseña no salta, debe ser por la 'ñ'
+
+                    let password = require('crypto').createHmac('sha256', 'secreto')
                         .update(req.payload.password).digest('hex');
 
-                    usuario = {
+                    let usuario = {
                         usuario: req.payload.usuario,
-                        password: password,
+                        nombre: req.payload.nombre,
+                        color: req.payload.color,
+                        password: password
                     }
-                
-                    await equipoRepo.saveUser(usuario).then((id) => {
-                            respuesta = "";
-                            if (id == null) {
-                                respuesta =  h.redirect('/registro?mensaje="Error al crear cuenta"')
-                            } else {
-                                respuesta = h.redirect('/login?mensaje="Usuario Creado"')
-                                idAnuncio = id;
-                            }
-                        })
+
+                    await equipoRepo.search({'usuario': usuario.usuario}).then( async (result) => {
+                       if (result.length !== 0) {
+                           respuesta =  h.redirect('/registro?mensaje="Usuario no disponible"');
+                       } else {
+                           await equipoRepo.save(usuario).then((id) => {
+                               respuesta = "";
+                               if (id == null) {
+                                   respuesta =  h.redirect('/registro?mensaje="Error al crear cuenta"')
+                               } else {
+                                   respuesta = h.redirect('/login?mensaje="Usuario Creado"');
+                               }
+                           });
+                       }
+                    });
 
                     return respuesta;
                 }
@@ -395,6 +424,12 @@ module.exports = {
                             }
                         })
 
+                    totalTorneos.forEach(torneo => {
+                        torneo.inicioInscripcion = module.exports.getFechaBonita(torneo.inicioInscripcion);
+                        torneo.finInscripcion = module.exports.getFechaBonita(torneo.finInscripcion);
+                    })
+
+
                     var paginas = [];
                     for( i=1; i <= pgUltima; i++){
                         if ( i == pg ){
@@ -404,7 +439,7 @@ module.exports = {
                         }
                     }
                     
-                    return h.view('mistorneos',
+                    return h.view('torneos/mistorneos',
                         {
                             torneos: totalTorneos,
                             usuarioAutenticado: req.auth.credentials,
@@ -415,42 +450,32 @@ module.exports = {
             },
             {
                 method: 'GET',
-                path: '/anuncios',
+                path: '/torneos',
                 handler: async (req, h) => {
-
-
-                    anunciosEjemplo = [
-                        {titulo: "iphone", precio: 400},
-                        {titulo: "xBox", precio: 300},
-                        {titulo: "teclado", precio: 30},
-                    ]
 
                     var criterio = {};
                     if (req.query.criterio != null ){
-                        criterio = { "titulo" : {$regex : ".*"+req.query.criterio+".*"}};
+                        criterio = { "nombre" : {$regex : ".*"+req.query.criterio+".*"}};
                     }
-                    await repositorio.conexion()
-                        .then((db) => repositorio.obtenerAnuncios(db, criterio))
-                        .then((anuncios) => {
-                            anunciosEjemplo = anuncios;
+                    await torneoRepo.search(criterio)
+                        .then((torneos) => {
+                            totalTorneos = torneos;
                         })
 
                     // Recorte
-                    anunciosEjemplo.forEach( (e) => {
-                        if (e.titulo.length > 25){
-                            e.titulo =
-                                e.titulo.substring(0, 25) + "...";
+                    totalTorneos.forEach( (e) => {
+                        if (e.nombre.length > 25){
+                            e.nombre =
+                                e.nombre.substring(0, 25) + "...";
                         }
-                        if (e.descripcion.length > 80) {
-                            e.descripcion =
-                                e.descripcion.substring(0, 80) + "...";;
-                        }
+                         e.inicioInscripcion = module.exports.getFechaBonita(e.inicioInscripcion);
+                         e.finInscripcion= module.exports.getFechaBonita(e.finInscripcion);
                     });
 
-                    return h.view('anuncios',
-                        {
-                            usuario: 'jordán',
-                            anuncios: anunciosEjemplo
+                    return h.view('torneos/torneos',
+                        {                            
+                            torneos: totalTorneos,
+                            usuarioAutenticado : module.exports.getUsuarioIdentificado(req)
                         }, { layout: 'base'} );
                 }
             },
