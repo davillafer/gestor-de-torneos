@@ -117,8 +117,10 @@ module.exports = {
                             respuesta = '/torneos?mensaje=Ya se ha unido al torneo&tipoMensaje=danger';
                         }
                     });
-
-                    torneo.equipos.push(req.auth.credentials);
+                    if(module.exports.getFechaBonita(new Date()) < torneo.finInscripcion)
+                        torneo.equipos.push(req.auth.credentials);
+                    else
+                        respuesta = '/torneos?mensaje=Ya no permite inscripciones el torneo&tipoMensaje=danger';
 
                     await torneoRepo.update(torneo) .then((result) => {
                         if(result)
@@ -631,6 +633,10 @@ module.exports = {
                          e.inicioInscripcion = module.exports.getFechaBonita(e.inicioInscripcion);
                          e.finInscripcion= module.exports.getFechaBonita(e.finInscripcion);
                          e.categoria = require('./models/Categoria').categorias[e.categoria];
+                         e.disponible = true;
+                         if(module.exports.getFechaBonita(new Date()) > e.finInscripcion){
+                            e.disponible = false;
+                         }
                          if(module.exports.getUsuarioIdentificado(req) != null){
                             e.unido = false;
                             e.equipos.forEach(equipo => {

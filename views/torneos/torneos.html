@@ -22,10 +22,14 @@
                             {{#if unido}}
                             <span class="uk-label uk-label-success">UNIDO</span>
                             {{else}}
+                                {{#if disponible}}
                                 <a class="uk-width-1-1 uk-button uk-button-secondary uk-button-small"
                                 href="/torneos/{{ _id }}/unirse">
                                 Apuntarse
                                 </a>
+                                {{else}}
+                                <span class="uk-label uk-label-danger">CERRADA INSCRIPCION</span>
+                                {{/if}}
                             {{/if}}
                             </p>
                              <p>
