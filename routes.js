@@ -178,37 +178,37 @@ module.exports = {
                     //     });
 
 
-                    await repositorio.conexion()
-                        .then((db) => repositorio.obtenerFormularios(db, criterio)) // TorneoRepo.search(criterio)
+                    await torneoRepo.search(criterio)
                         .then((torneos) => {
                             torneo = torneos[0];
                         });
 
-                    partidos = [];
-                    if (torneo.partidos == []){
-                        if (true){
-                            equipos = torneo.equipos;
-                            equiposLenght = equipos.length;
-                            equipoAnterior = undefined;
-                            for(i = 0; i < equiposLenght; i++){
-                                number = Math.floor(Math.random() * (equipos.length - 0)) + 0;
+                    var partidos = [];
+                    if (torneo.partidos.length == 0){
+                        if (false){
+                            var equipos = torneo.equipos;
+                            var equiposLenght = equipos.length;
+                            var equipoAnterior = undefined;
+                            for(var i = 0; i < equiposLenght; i++){
+                                var number = Math.floor(Math.random() * (equipos.length - 0)) + 0;
                                 if (equipoAnterior == undefined){
                                     equipoAnterior = equipos[number];
                                     equipos.splice(number, 1);
                                 } else {
-                                    partido = {
+                                    var partido = {
                                         equipoLocal : equipoAnterior,
                                         equipoVisitante : equipos[number]
-                                    }
+                                    };
+                                    equipoAnterior = undefined
                                     equipos.splice(number, 1);
                                     torneo.partidos.push(partido)
                                 }
                             }
 
 
-                            auxTorneos = [];
+                            var auxTorneos = [];
                             while(true){
-                                if (auxTorneos == []){
+                                if (auxTorneos.length == 0){
                                     let half = Math.floor(torneo.partidos.length / 2);
                                     partidos.push(torneo.partidos.slice(0, half));
                                     auxTorneos = torneo.partidos.slice(half, torneo.partidos.length);
@@ -227,7 +227,7 @@ module.exports = {
                     } else {
                         auxTorneos = [];
                         while(true){
-                            if (auxTorneos == []){
+                            if (auxTorneos.length == 0){
                                 let half = Math.floor(torneo.partidos.length / 2);
                                 partidos.push(torneo.partidos.slice(0, half));
                                 auxTorneos = torneo.partidos.slice(half, torneo.partidos.length);

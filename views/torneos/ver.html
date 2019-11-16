@@ -1,6 +1,6 @@
 <section class="uk-section">
     <div class="uk-container">
-        {{#if (empty torneos.partidos)}}
+        {{#if (empty torneo.partidos)}}
         <div class="uk-overflow-auto">
             <table class="uk-table uk-table-middle uk-table-divider">
                 <thead>
@@ -9,9 +9,9 @@
                 </tr>
                 </thead>
                 <tbody>
-                {{#each torneos.equipos}}
+                {{#each torneo.equipos}}
                 <tr>
-                    <td >{{ nombre }}</td>
+                    <td >{{ this }}</td>
                 </tr>
                 {{/each}}
                 </tbody>
@@ -28,32 +28,33 @@
                             <li class="tournament-bracket__item">
                                 <div class="tournament-bracket__match" tabindex="0">
                                     <table class="tournament-bracket__table">
+                                        <!-- >
                                         <caption class="tournament-bracket__caption">
                                             <time datetime="1998-02-18">18 February 1998</time>
-                                        </caption>
+                                        </caption> -->
                                         <thead class="sr-only">
                                         <tr>
-                                            <th>Country</th>
-                                            <th>Score</th>
+                                            <th>Equipo</th>
+                                            <th>Resultado</th>
                                         </tr>
                                         </thead>
                                         <tbody class="tournament-bracket__content">
                                         <tr class="tournament-bracket__team tournament-bracket__team--winner">
                                             <td class="tournament-bracket__country">
-                                                <abbr class="tournament-bracket__code" title="Canada">CAN</abbr>
+                                                <abbr class="tournament-bracket__code">{{this.equipoLocal}}</abbr>
                                                 <span class="tournament-bracket__flag flag-icon flag-icon-ca" aria-label="Flag"></span>
                                             </td>
                                             <td class="tournament-bracket__score">
-                                                <span class="tournament-bracket__number">4</span>
+                                                <span class="tournament-bracket__number">0</span>
                                             </td>
                                         </tr>
                                         <tr class="tournament-bracket__team">
                                             <td class="tournament-bracket__country">
-                                                <abbr class="tournament-bracket__code" title="Kazakhstan">KAZ</abbr>
+                                                <abbr class="tournament-bracket__code">{{this.equipoVisitante}}</abbr>
                                                 <span class="tournament-bracket__flag flag-icon flag-icon-kz" aria-label="Flag"></span>
                                             </td>
                                             <td class="tournament-bracket__score">
-                                                <span class="tournament-bracket__number">1</span>
+                                                <span class="tournament-bracket__number">0</span>
                                             </td>
                                         </tr>
                                         </tbody>
