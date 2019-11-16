@@ -1,3 +1,7 @@
+const categorias = require('./models/Categoria');
+const FutbolFactory = require('./factory/FutbolFactory');
+const futbolFactory = new FutbolFactory();
+
 module.exports = {
     name: 'MiRouter',
     utilSubirFichero : async (binario, nombre, extension) => {
@@ -178,37 +182,37 @@ module.exports = {
                     //     });
 
 
-                    await repositorio.conexion()
-                        .then((db) => repositorio.obtenerFormularios(db, criterio)) // TorneoRepo.search(criterio)
+                    await torneoRepo.search(criterio)
                         .then((torneos) => {
                             torneo = torneos[0];
                         });
 
-                    partidos = [];
-                    if (torneo.partidos == []){
-                        if (true){
-                            equipos = torneo.equipos;
-                            equiposLenght = equipos.length;
-                            equipoAnterior = undefined;
-                            for(i = 0; i < equiposLenght; i++){
-                                number = Math.floor(Math.random() * (equipos.length - 0)) + 0;
+                    var partidos = [];
+                    if (torneo.partidos.length == 0){
+                        if (false){
+                            var equipos = torneo.equipos;
+                            var equiposLenght = equipos.length;
+                            var equipoAnterior = undefined;
+                            for(var i = 0; i < equiposLenght; i++){
+                                var number = Math.floor(Math.random() * (equipos.length - 0)) + 0;
                                 if (equipoAnterior == undefined){
                                     equipoAnterior = equipos[number];
                                     equipos.splice(number, 1);
                                 } else {
-                                    partido = {
+                                    var partido = {
                                         equipoLocal : equipoAnterior,
                                         equipoVisitante : equipos[number]
-                                    }
+                                    };
+                                    equipoAnterior = undefined
                                     equipos.splice(number, 1);
                                     torneo.partidos.push(partido)
                                 }
                             }
 
 
-                            auxTorneos = [];
+                            var auxTorneos = [];
                             while(true){
-                                if (auxTorneos == []){
+                                if (auxTorneos.length == 0){
                                     let half = Math.floor(torneo.partidos.length / 2);
                                     partidos.push(torneo.partidos.slice(0, half));
                                     auxTorneos = torneo.partidos.slice(half, torneo.partidos.length);
@@ -227,7 +231,7 @@ module.exports = {
                     } else {
                         auxTorneos = [];
                         while(true){
-                            if (auxTorneos == []){
+                            if (auxTorneos.length == 0){
                                 let half = Math.floor(torneo.partidos.length / 2);
                                 partidos.push(torneo.partidos.slice(0, half));
                                 auxTorneos = torneo.partidos.slice(half, torneo.partidos.length);
@@ -562,18 +566,55 @@ module.exports = {
                 options: {
                     auth: 'auth-registrado'
                 },
-                handler: async (req, h) => {                    
-                    const categoria = require('models/Categoria');
-                    console.log(categoria);
-                    let equipos = [2, 4, 8, 16, 32];
+                handler: async (req, h) => {
+                    let numEquipos = [2, 4, 8, 16, 32];
+                    let categoria = categorias.categorias;
                     return h.view('torneos/crear',
                         {
                             categoria,
-                            equipos,
+                            numEquipos,
                             usuarioAutenticado: req.auth.credentials,
                         },
                         { layout: 'base'}
                     );
+                }
+            },
+            {
+                method: 'POST',
+                path: '/torneos/crear',
+                options: {
+                    auth: 'auth-registrado'
+                },
+                handler: async (req, h) => {
+                    // Creamos el torneo
+                    let torneo = futbolFactory.crearTorneo();
+
+                    // Obtener valores del usuarios
+                    let fin = new Date(req.payload.fecha);
+                    let empieza = new Date(req.payload.fecha);
+                    empieza.setDate(empieza.getDate() - 10);
+
+                    torneo.nombre(req.payload.nombre);
+                    torneo.numEquipos(req.payload.nEquipos);
+                    torneo.categoria(req.payload.categoria);
+                    torneo.finInscripcion(fin);
+                    torneo.visibilidad(req.payload.visibilidad);
+                    torneo.inicioInscripcion(empieza);
+                    torneo.creador(req.state['session-id'].usuario);
+
+                    // Guardar el torneo en la bd
+                    let respuesta = null;
+                    await torneoRepo.save(torneo).then((id) => {
+                        respuesta = "";
+                        if (id == null) {
+                            respuesta =  h.redirect('/?mensaje=Error al crear el torneo');
+                        } else {
+                            respuesta = h.redirect('/?mensaje=Torneo creado');
+                        }
+                    });
+
+                    // Mostrar la vista
+                    return respuesta;
                 }
             },
             {
