@@ -57,6 +57,25 @@ module.exports = {
         server.route([
             {
                 method: 'GET',
+                path: '/torneos/{id}/eliminar',
+                options: {
+                    auth: 'auth-registrado'
+                },
+                handler: async (req, h) => {
+
+                    var criterio = { "_id" :
+                            require("mongodb").ObjectID(req.params.id) };
+
+                    await torneoRepo.delete(criterio)
+                        .then((resultado) => {
+                            console.log("Eliminado")
+                        })
+
+                        return h.redirect('/torneos/creados?mensaje=Torneo Eliminado')
+                }
+            },
+            {
+                method: 'GET',
                 path: '/torneos/inscrito',
                 options: {
                     auth: 'auth-registrado'
