@@ -1,6 +1,7 @@
 var AbsFactory = require('./AbsFactory');
 var PartidoFutbol = require('../models/PartidoFutbol');
 var TorneoFutbol  = require('../models/TorneoFutbol');
+
 module.exports = class FutbolFactory extends AbsFactory {
 
     crearTorneo() {
@@ -10,5 +11,4 @@ module.exports = class FutbolFactory extends AbsFactory {
     crearPartido() {
        throw new PartidoFutbol();
     }
-    
 }
