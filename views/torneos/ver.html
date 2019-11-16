@@ -1,5 +1,6 @@
 <section class="uk-section">
     <div class="uk-container">
+        {{#if (empty torneos.partidos)}}
         <div class="uk-overflow-auto">
             <table class="uk-table uk-table-middle uk-table-divider">
                 <thead>
@@ -10,11 +11,62 @@
                 <tbody>
                 {{#each torneos.equipos}}
                 <tr>
-                    <td >{{ titulo }}</td>
+                    <td >{{ nombre }}</td>
                 </tr>
                 {{/each}}
                 </tbody>
             </table>
         </div>
+        {{else}}
+        <div class="uk-card uk-card-default uk-card-body uk-align-center">
+            <div class="uk-overflow-auto">
+                <div class="container">
+                    {{#each partidos}}
+                    <div class="tournament-bracket__round">
+                        <ul class="tournament-bracket__list">
+                            {{#each this}}
+                            <li class="tournament-bracket__item">
+                                <div class="tournament-bracket__match" tabindex="0">
+                                    <table class="tournament-bracket__table">
+                                        <caption class="tournament-bracket__caption">
+                                            <time datetime="1998-02-18">18 February 1998</time>
+                                        </caption>
+                                        <thead class="sr-only">
+                                        <tr>
+                                            <th>Country</th>
+                                            <th>Score</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody class="tournament-bracket__content">
+                                        <tr class="tournament-bracket__team tournament-bracket__team--winner">
+                                            <td class="tournament-bracket__country">
+                                                <abbr class="tournament-bracket__code" title="Canada">CAN</abbr>
+                                                <span class="tournament-bracket__flag flag-icon flag-icon-ca" aria-label="Flag"></span>
+                                            </td>
+                                            <td class="tournament-bracket__score">
+                                                <span class="tournament-bracket__number">4</span>
+                                            </td>
+                                        </tr>
+                                        <tr class="tournament-bracket__team">
+                                            <td class="tournament-bracket__country">
+                                                <abbr class="tournament-bracket__code" title="Kazakhstan">KAZ</abbr>
+                                                <span class="tournament-bracket__flag flag-icon flag-icon-kz" aria-label="Flag"></span>
+                                            </td>
+                                            <td class="tournament-bracket__score">
+                                                <span class="tournament-bracket__number">1</span>
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </li>
+                            {{/each}}
+                        </ul>
+                    </div>
+                    {{/each}}
+                </div>
+            </div>
+        </div>
+        {{/if}}
     </div>
 </section>
