@@ -2,7 +2,7 @@
 
 module.exports =  class TorneoFutbol{
     constructor(){
-        this.id = null;
+        this._id = null;
         this.nombre = null;
         this.numEquipos = null;
         this.finInscripcion = null;
@@ -14,8 +14,12 @@ module.exports =  class TorneoFutbol{
     }
 
 
-    inscribir(equipo){
-        
+    inscribir(equipo_id){
+        this.equipos.forEach(id => {
+            if(id = equipo_id)
+                throw new Error('El equipo ya está inscrito');
+        })
+        equipos.push(equipo_id);            
     }
 
     desInscribir(equipo){

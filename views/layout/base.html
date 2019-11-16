@@ -73,7 +73,7 @@
                         <a href="/torneos/creados">
                             <span data-uk-icon="list"
                                   class="uk-margin-small-right">
-                            </span> Mis torneos
+                            </span> Gestionar torneos
                         </a>
                     </li>
                 </ul>
@@ -90,7 +90,9 @@
                 {{#if usuarioAutenticado}}
                 <div class="uk-navbar-item uk-navbar-right">
                     <div class="uk-button uk-button-default uk-visible@m">
-                         {{usuarioAutenticado}}
+                                <a href="/perfil">
+                                    {{ usuarioAutenticado }}
+                                </a>
                     </div>
                 </div>
                 <div class="uk-navbar-item uk-navbar-right">
@@ -101,8 +103,7 @@
                         </span>Desconectarse
                     </a>
                 </div>
-                {{/if}}
-                {{^usuarioAutenticado}}
+                {{else}}
                 <div class="uk-navbar-item uk-navbar-right">
                     <a href="/login"
                        class="uk-button uk-button-default uk-visible@m">
@@ -111,7 +112,7 @@
                         </span>Acceder
                     </a>
                 </div>
-                {{/usuarioAutenticado}}
+                {{/if}}
 
                 <!-- Menú de movil lo oculta en pantallas mayores de m-->
                 <div class="uk-navbar-item uk-hidden@m">
@@ -161,7 +162,11 @@
             {{/if}}
             {{#if usuarioAutenticado}}
             <li>
-                {{ usuarioAutenticado }}
+                <a href="/perfil">
+                    <span class="uk-margin-small-right uk-icon"
+                          data-uk-icon="icon: user">
+                    </span>{{ usuarioAutenticado }}
+                </a>
             </li>
             <li>
                 <a href="/desconectarse">
@@ -170,8 +175,7 @@
                     </span>Desconectarse
                 </a>
             </li>
-            {{/if}}
-            {{^usuarioAutenticado}}
+            {{else}}
             <li>
                 <a href="/login">
                     <span class="uk-margin-small-right uk-icon"
@@ -179,7 +183,7 @@
                     </span>Acceder
                 </a>
             </li>
-            {{/usuarioAutenticado}}
+            {{/if}}
         </ul>
     </div>
 </div>

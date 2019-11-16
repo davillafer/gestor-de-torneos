@@ -49,7 +49,7 @@ module.exports = class AbsRepo{
         let db = await this.conexion();
         return new Promise((resolve, reject) => {
             var collection = db.collection(this.getCollection());
-            collection.update({"_id" :entitie.id}, {$set: entitie}, (err, result) => {
+            collection.update({"_id" :entitie._id}, {$set: entitie}, (err, result) => {
                 if (err) {
                     resolve(null);
                 } else {
@@ -61,11 +61,11 @@ module.exports = class AbsRepo{
         });
     }
 
-    async delete(entitie){
+    async delete(criterio){
         let db = await this.conexion();
         return new Promise((resolve, reject) => {
             var collection = db.collection(this.getCollection());
-            collection.remove({"_id" :entitie.id}, (err, result) => {
+            collection.remove(criterio, (err, result) => {
                 if (err) {
                     resolve(null);
                 } else {

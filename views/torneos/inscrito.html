@@ -1,0 +1,28 @@
+
+<section class="uk-section">
+        <div class="uk-container">
+            <div class="uk-overflow-auto">
+                <table class="uk-table uk-table-hover uk-table-middle uk-table-divider">
+                    <thead>
+                    <tr>
+                        <th class="uk-table-expand">Nombre</th>
+                        <th class="uk-table-expand">Creador</th>                        
+                        <th class="uk-table-expand">Fin Inscripcion</th>                        
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {{#each torneos}}
+                    <tr>
+                        <td > <a class="uk-link" href="/torneos/{{_id}}/ver">
+                            {{ nombre }}
+                        </a></td>
+                        <td >{{ creador }}</td>
+                        <td >{{ finInscripcion }}</td>                      
+                    </tr>
+                    {{/each}}
+                    </tbody>
+                </table>
+            </div>    
+          
+        </div>
+    </section>
