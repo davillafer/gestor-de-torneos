@@ -406,7 +406,7 @@ module.exports = {
                     let user = await equipoRepo.search({ 'usuario': req.state['session-id'].usuario })
                         .then( async result => {
                             if (result) {
-                                return result;
+                                return result[0];
                             } else {
                                 return null;
                             }
@@ -414,7 +414,10 @@ module.exports = {
                     // Comprobamos si hay error
                     if ( user ) {
                         return h.view('usuario/perfil',
-                            { user },
+                            {
+                                user,
+                                usuarioAutenticado: req.state["session-id"].usuario
+                            },
                             { layout: 'base'});
                     } else {
                         return h.redirect('/?mensaje="Ha ocurrido un error"');
@@ -425,7 +428,23 @@ module.exports = {
                 method: 'POST',
                 path: '/perfil',
                 handler: async (req, h) => {
-                    // TODO: modificar usuario
+                    let respuesta;
+
+                    let usuario = {
+                        usuario: req.payload.usuario,
+                        nombre: req.payload.nombre,
+                        color: req.payload.color
+                    }
+
+                    await equipoRepo.update(usuario).then((id) => {
+                        if (id == null) {
+                            respuesta =  h.redirect('/perfil?mensaje="Error al modificar"')
+                        } else {
+                            respuesta = h.redirect('/perfil?mensaje="Usuario modificado"');
+                        }
+                    });
+
+                    return respuesta;
                 }
             },
             {
