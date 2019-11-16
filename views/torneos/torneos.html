@@ -8,18 +8,25 @@
                 <div style="height:400px;"
                      class="uk-card uk-card-default uk-grid uk-grid-collapse uk-child-width-1-2 uk-margin">
                     <div class="uk-card-media-left uk-cover-container">
+                        <a href="/torneos/{{ _id }}/ver">
                         <img style="height:400px;"
-                             class="uk-cover" src="/images/gesto/torneo.jpg">
+                             class="uk-cover" src="/images/gesto/torneo.jpg"></a>
                     </div>
                     <div>
                         <div class="uk-card-body">
                             <h3 class="uk-card-title">{{ nombre }}</h3>
-                            <p>Inicio de Inscripción {{ inicioInscripcion }}.</p>
+                            <p>Creado por <span uk-icon="icon: user"></span> {{creador}}</p>
+                            <p>Inicio de Inscripción {{ inicioInscripcion }}.</p>                            
                             <p>Fin de Inscripción {{ finInscripcion }}.</p>
-                            <a class="uk-width-1-1 uk-button uk-button-secondary uk-button-small"
-                                href="/ver/{{ _id }}">
+                            {{#if unido}}
+                            <span class="uk-label uk-label-success">UNIDO</span>
+                            {{else}}
+                                <a class="uk-width-1-1 uk-button uk-button-secondary uk-button-small"
+                                href="/torneos/{{ _id }}/unirse">
                                 Apuntarse
-                            </a>
+                                </a>
+                            {{/if}}
+                            
                         </div>
                     </div>
                 </div>
