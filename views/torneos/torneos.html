@@ -18,6 +18,7 @@
                             <p>Creado por <span uk-icon="icon: user"></span> {{creador}}</p>
                             <p>Inicio de Inscripción {{ inicioInscripcion }}.</p>                            
                             <p>Fin de Inscripción {{ finInscripcion }}.</p>
+                            <p>
                             {{#if unido}}
                             <span class="uk-label uk-label-success">UNIDO</span>
                             {{else}}
@@ -26,7 +27,10 @@
                                 Apuntarse
                                 </a>
                             {{/if}}
-                            
+                            </p>
+                             <p>
+                                <b>{{categoria}}</b>  
+                            </p>
                         </div>
                     </div>
                 </div>

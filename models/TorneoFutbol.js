@@ -2,7 +2,7 @@
 
 module.exports =  class TorneoFutbol{
     constructor(){
-        this.id = null;
+        this._id = null;
         this.nombre = null;
         this.numEquipos = null;
         this.finInscripcion = null;

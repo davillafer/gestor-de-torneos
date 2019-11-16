@@ -630,6 +630,7 @@ module.exports = {
                         }
                          e.inicioInscripcion = module.exports.getFechaBonita(e.inicioInscripcion);
                          e.finInscripcion= module.exports.getFechaBonita(e.finInscripcion);
+                         e.categoria = require('./models/Categoria').categorias[e.categoria];
                          if(module.exports.getUsuarioIdentificado(req) != null){
                             e.unido = false;
                             e.equipos.forEach(equipo => {
