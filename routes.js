@@ -449,6 +449,27 @@ module.exports = {
             },
             {
                 method: 'GET',
+                path: '/torneos/crear',
+                options: {
+                    auth: 'auth-registrado'
+                },
+                handler: async (req, h) => {
+                    console.log('hora');
+                    const categoria = require('models/Categoria');
+                    console.log(categoria);
+                    let equipos = [2, 4, 8, 16, 32];
+                    return h.view('torneos/crear',
+                        {
+                            categoria,
+                            equipos,
+                            usuarioAutenticado: req.auth.credentials,
+                        },
+                        { layout: 'base'}
+                    );
+                }
+            },
+            {
+                method: 'GET',
                 path: '/torneos/creados',
                 options: {
                     auth: 'auth-registrado'
