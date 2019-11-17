@@ -1,95 +1,132 @@
 module.exports =  class TorneoFutbol {
 
-    constructor() {
-        //this._id = null;
-        this._nombre = null;
-        this._numEquipos = null;
-        this._finInscripcion = null;
-        this._inicioInscripcion = null;
-        this._partidos = [];
-        this._equipos = [];
-        this._creador = null;
-        this._categoria = null;
-        this._visibilidad = null;
+    // No hay constructor overloading
+    constructor(nombre, numEquipos, finInscripcion, inicioInscripcion, partidos, equipos, creador, categoria, visibilidad) {
+        // _id da problemas con mongo si no lo genera automáticamnete
+        if (typeof nombre !== 'undefined')
+            this._nombre = nombre;
+        else
+            this._nombre = null;
+
+        if (typeof numEquipos !== 'undefined')
+            this._numEquipos = numEquipos;
+        else
+            this._numEquipos = null;
+
+        if (typeof finInscripcion !== 'undefined')
+            this._finInscripcion = finInscripcion;
+        else
+            this._finInscripcion = null;
+
+        if (typeof inicioInscripcion !== 'undefined')
+            this._inicioInscripcion = inicioInscripcion;
+        else
+            this._inicioInscripcion = null;
+
+        if (typeof partidos !== 'undefined')
+            this._partidos = partidos;
+        else
+            this._partidos = null;
+
+        if (typeof equipos !== 'undefined')
+            this._equipos = equipos;
+        else
+            this._equipos = null;
+
+        if (typeof creador !== 'undefined')
+            this._creador = creador;
+        else
+            this._creador = null;
+
+        if (typeof categoria !== 'undefined')
+            this._categoria = categoria;
+        else
+            this._categoria = null;
+
+        if (typeof visibilidad !== 'undefined')
+            this._visibilidad = visibilidad;
+        else
+            this._visibilidad = null;
+        this._nombre = nombre;
+        this._numEquipos = numEquipos;
+        this._finInscripcion = finInscripcion;
+        this._inicioInscripcion = inicioInscripcion;
+        this._partidos = partidos;
+        this._equipos = equipos;
+        this._creador = creador;
+        this._categoria = categoria;
+        this._visibilidad = visibilidad;
     }
 
-    /*id() {
-        return this._id;
-    }
-
-    id(value) {
-        this._id = value;
-    }*/
-
-    nombre() {
+    get nombre() {
         return this._nombre;
     }
 
-    nombre(value) {
+    set nombre(value) {
         this._nombre = value;
     }
 
-    numEquipos() {
+    get numEquipos() {
         return this._numEquipos;
     }
 
-    numEquipos(value) {
+    set numEquipos(value) {
         this._numEquipos = value;
     }
 
-    finInscripcion() {
+    get finInscripcion() {
         return this._finInscripcion;
     }
 
-    finInscripcion(value) {
+    set finInscripcion(value) {
         this._finInscripcion = value;
     }
 
-    inicioInscripcion() {
+    get inicioInscripcion() {
         return this._inicioInscripcion;
     }
 
-    inicioInscripcion(value) {
+    set inicioInscripcion(value) {
         this._inicioInscripcion = value;
     }
 
-    partidos() {
+    get partidos() {
         return this._partidos;
     }
 
-    partidos(value) {
+    set partidos(value) {
         this._partidos = value;
     }
 
-    equipos() {
+    get equipos() {
         return this._equipos;
     }
 
-    equipos(value) {
+    set equipos(value) {
         this._equipos = value;
     }
 
-    creador() {
+    get creador() {
         return this._creador;
     }
 
-    creador(value) {
+    set creador(value) {
         this._creador = value;
     }
 
-    categoria() {
+    get categoria() {
         return this._categoria;
     }
 
-    categoria(value) {
+    set categoria(value) {
         this._categoria = value;
     }
 
-    visibilidad() {
+    get visibilidad() {
         return this._visibilidad;
     }
 
-    visibilidad(value) {
+    set visibilidad(value) {
         this._visibilidad = value;
     }
 

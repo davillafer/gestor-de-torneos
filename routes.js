@@ -2,6 +2,7 @@ const categorias = require('./models/Categoria');
 const ObjectID = require("mongodb").ObjectID;
 const FutbolFactory = require('./factory/FutbolFactory');
 const futbolFactory = new FutbolFactory();
+const TorneoFutbol = require('./models/TorneoFutbol');
 
 module.exports = {
     name: 'MiRouter',
@@ -49,7 +50,16 @@ module.exports = {
             return `${fecha.getDate()}/${fecha.getMonth()+1}/${fecha.getFullYear()}`;
         }
     },
-    
+    getTorneos(lista) {
+        let aux = [];
+        lista.forEach(t => {
+           aux.push(module.exports.getTorneo(t));
+        });
+        return aux;
+    },
+    getTorneo(t) {
+        return new TorneoFutbol(t._nombre, t._numEquipos, t._finInscripcion, t._inicioInscripcion, t._partidos, t._equipos, t._creador, t._categoria, t._visibilidad);
+    },
     register: async (server, options) => {
         miserver = server;        
         equipoRepo = server.methods.getEquipoRepo();
@@ -79,38 +89,34 @@ module.exports = {
                     return result;
                 }
             },
+            /* TORNEOS EN LOS QUE EL USUARIO ESTÁ INCRITO */
             {
                 method: 'GET',
                 path: '/torneos/inscrito',
                 options: {
                     auth: 'auth-registrado'
                 },
-                handler: async (req, h) => {        
-
-                    var criterio = null;
-                    // cookieAuth
-
-                    await torneoRepo.search(criterio)
-                        .then((torneos) => {
-                             totalTorneos = torneos;                            
-                        });
-
-                    var torneosInscrito = [];
-                        
-                    totalTorneos.forEach(torneo => {
+                handler: async (req, h) => {
+                    // Obtener todos los torneos
+                    let totalTorneos = await torneoRepo.search({}).then((torneos) => {
+                             return torneos;
+                    });
+                    // Transformar a objetos de nuestro modelo
+                    totalTorneos = module.exports.getTorneos(totalTorneos);
+                    // Torneos en los que el usuario está inscrito
+                    let torneos = [];
+                    await totalTorneos.forEach(torneo => {
                         torneo.inicioInscripcion = module.exports.getFechaBonita(torneo.inicioInscripcion);
                         torneo.finInscripcion = module.exports.getFechaBonita(torneo.finInscripcion);
                         torneo.equipos.forEach(equipo => {
-                            if (equipo == req.auth.credentials)
-                            {
-                                torneosInscrito.push(torneo);
-                            }
-                        })
-                    })
-
+                            if (equipo === req.state["session-id"].usuario)
+                                torneos.push(torneo);
+                        });
+                    });
+                    // Devolver vista
                     return h.view('torneos/inscrito',
                         {
-                            torneos: torneosInscrito,
+                            torneos,
                             usuarioAutenticado: req.auth.credentials                            
                         },
                         { layout: 'base'} );
@@ -607,13 +613,15 @@ module.exports = {
                     let empieza = new Date(req.payload.fecha);
                     empieza.setDate(empieza.getDate() - 10);
 
-                    torneo.nombre(req.payload.nombre);
-                    torneo.numEquipos(req.payload.nEquipos);
-                    torneo.categoria(req.payload.categoria);
-                    torneo.finInscripcion(fin);
-                    torneo.visibilidad(req.payload.visibilidad);
-                    torneo.inicioInscripcion(empieza);
-                    torneo.creador(req.state['session-id'].usuario);
+                    torneo.nombre = req.payload.nombre;
+                    torneo.numEquipos = req.payload.nEquipos;
+                    torneo.categoria = req.payload.categoria;
+                    torneo.finInscripcion = fin;
+                    torneo.visibilidad = req.payload.visibilidad;
+                    torneo.inicioInscripcion = empieza;
+                    torneo.equipos = [];
+                    torneo.partidos = [];
+                    torneo.creador = req.state['session-id'].usuario;
 
                     // Guardar el torneo en la bd
                     let respuesta = null;
