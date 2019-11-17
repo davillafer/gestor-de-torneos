@@ -205,7 +205,7 @@ module.exports = {
                         });
                         let auxTorneos = [];
                         if (torneo.partidos.length == 1){
-                            partidos = torneo.partidos;
+                            partidos.push(torneo.partidos);
                         } else {
                             while(true){
                                 if (auxTorneos.length == 0){
@@ -226,7 +226,7 @@ module.exports = {
                     } else {
                         let auxTorneos = [];
                         if (torneo.partidos.length == 1){
-                            partidos = torneo.partidos;
+                            partidos.push(torneo.partidos);
                         } else {
                             while(true){
                                 if (auxTorneos.length == 0){
