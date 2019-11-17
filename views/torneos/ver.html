@@ -1,8 +1,3 @@
-<div id="my-modal" class="uk-flex-top" uk-modal>
-    <div class="uk-modal-dialog uk-margin-auto-vertical">
-        <p>Halo</p>
-    </div>
-</div>
 {{#if (empty torneo.partidos)}}
 <section class="uk-section">
     <div class="uk-container">
@@ -41,7 +36,7 @@
                                 <div id="{{this.equipoLocal}}!-!{{this.equipoVisitante}}" class="tournament-bracket__match" tabindex="0" >
                                     <table class="tournament-bracket__table">
                                         <caption class="tournament-bracket__caption">
-                                            <time datetime="1998-02-18">18 February 1998</time>
+                                            <time datetime="1998-02-18">{{this.fechaHora}}</time>
                                         </caption>
                                         <thead class="sr-only">
                                         <tr>
