@@ -6,35 +6,6 @@ const TorneoFutbol = require('./models/TorneoFutbol');
 
 module.exports = {
     name: 'MiRouter',
-    utilSubirFichero : async (binario, nombre, extension) => {
-        return new Promise((resolve, reject) => {
-            nombre = nombre + "." + extension;
-            require('fs').writeFile('./public/subidas/'+nombre, binario, err => {
-                if (err) {
-                    resolve(false)
-                }
-                resolve(true)
-            })
-        })
-    },
-    getUsuarioIdentificado(req){
-        if(req.auth.credentials !== null){
-            return req.auth.credentials;
-        }else if(req.state['session-id'] != null && req.state['session-id'].usuario !=""){
-            return req.state['session-id'].usuario;
-        }else{
-            return null;
-        }
-    },
-    getIdUsuarioIdentificado(req){
-        if(req.auth.credentials !== null){
-            return req.auth.credentials;
-        }else if(req.state['session-id'] != null && req.state['session-id'].usuario !=""){
-            return req.state['session-id']; // TODO: Hay que sacar el id de la base de datos
-        }else{
-            return null;
-        }
-    },
     getFechaBonita(fecha){
         if(!fecha instanceof Date){
             return fecha;
@@ -155,8 +126,8 @@ module.exports = {
                         return h.redirect('/torneos?mensaje=Ya no permite inscripciones el torneo&tipoMensaje=danger');
                     // Actualizar bd
                     let result = null;
-                    await torneoRepo.update(torneo).then((result) => {
-                        if(result)
+                    await torneoRepo.update(torneo).then((res) => {
+                        if(res)
                             result = h.redirect('/torneos?mensaje=Se ha unido al torneo&tipoMensaje=success');
                         else
                             result = h.redirect('/torneos?mensaje=No se ha podido unirse&tipoMensaje=danger');
@@ -540,60 +511,62 @@ module.exports = {
                     }
                     // Obtenemos la vista
                     return h.view('torneos/mistorneos',
-                        {
-                            torneos,
-                            usuarioAutenticado: req.state['session-id'].usuario,
-                            paginas
-                        },
-                        { layout: 'base'} );
+                    {
+                        torneos,
+                        usuarioAutenticado: req.state['session-id'].usuario,
+                        paginas
+                    },
+                    { layout: 'base'} );
                 }
             },
+            /* VER TORNEOS */
             {
                 method: 'GET',
                 path: '/torneos',
                 handler: async (req, h) => {
-
-                    var criterio = {};
-                    if (req.query.criterio != null ){
-                        criterio = { "nombre" : {$regex : ".*"+req.query.criterio+".*"}};
+                    // Criterio de búsqueda
+                    let criteria = {};
+                    if (req.query.criteria != null ){
+                        criteria = { "nombre" : {$regex : ".*"+req.query.criterio+".*"}};
                     }
-                    await torneoRepo.search(criterio)
-                        .then((torneos) => {
-                            totalTorneos = torneos;
-                        })
-
-                    
-                    totalTorneos.forEach( (e) => {
-                        if (e.nombre.length > 25){
-                            e.nombre =
-                                e.nombre.substring(0, 25) + "...";
+                    criteria._visibilidad = 'public';
+                    // Buscamos el torneo
+                    let torneos = await torneoRepo.search(criteria).then((torneos) => {
+                        return torneos;
+                    });
+                    // Transformar a objetos de nuestro modelo
+                    torneos = module.exports.getTorneos(torneos);
+                    // Recortamos el nombre para la interfaz
+                    torneos.forEach( (torneo) => {
+                        if (torneo.nombre.length > 25){
+                            torneo.nombre = torneo.nombre.substring(0, 25) + "...";
                         }
-                         e.inicioInscripcion = module.exports.getFechaBonita(e.inicioInscripcion);
-                         e.finInscripcion= module.exports.getFechaBonita(e.finInscripcion);
-                         e.categoria = require('./models/Categoria').categorias[e.categoria];
-                         e.disponible = true;
-                         if (module.exports.getFechaBonita(new Date()) > e.finInscripcion){
-                            e.disponible = false;
-                         }
-                         if(module.exports.getUsuarioIdentificado(req) != null){
-                            e.unido = false;
-                            e.equipos.forEach(equipo => {
-                                if(equipo == module.exports.getUsuarioIdentificado(req))
+                        torneo.inicioInscripcion = module.exports.getFechaBonita(torneo.inicioInscripcion);
+                        torneo.finInscripcion= module.exports.getFechaBonita(torneo.finInscripcion);
+                        torneo.disponible = true;
+                        let ahora = new Date();
+                        if (ahora > torneo.finInscripcion){
+                            torneo.disponible = false;
+                        }
+                        if(req.state['session-id'].usuario !== null){
+                            torneo.unido = false;
+                            torneo.equipos.forEach(equipo => {
+                                if(equipo === req.state['session-id'].usuario)
                                 {
-                                    e.unido = true;
+                                    torneo.unido = true;
                                 }
                             });
-                         }
-                         else{
-                            e.unido = false;
+                         } else {
+                            torneo.unido = false;
                          }
                     });
-
+                    // Obtenemos la vista
                     return h.view('torneos/torneos',
-                        {                            
-                            torneos: totalTorneos,
-                            usuarioAutenticado : module.exports.getUsuarioIdentificado(req)
-                        }, { layout: 'base'} );
+                    {
+                        torneos,
+                        usuarioAutenticado: req.state['session-id'].usuario
+                    },
+                    { layout: 'base'});
                 }
             },
             {
@@ -607,28 +580,13 @@ module.exports = {
             },
             {
                 method: 'GET',
-                path: '/anuncio/{id}',
-                handler: async  (req, h) => {
-                    return 'Anuncio id: ' + req.params.id;
-                }
-            },
-            {
-                method: 'GET',
                 path: '/',
                 handler: async (req, h) => {
-                    
                     return h.view('index',
-                        {
-                            usuarioAutenticado: module.exports.getUsuarioIdentificado(req),
-                            usuarioIdentificadoId: module.exports.getIdUsuarioIdentificado(req)
-                        },
-                        { layout: 'base'});
-                }
-            },{
-                method: 'GET',
-                path: '/api/',
-                handler: async (req, h) => {
-                    return  {usuarioAutenticado: module.exports.getUsuarioIdentificado(req)};
+                    {
+                        usuarioAutenticado: req.state['session-id'].usuario
+                    },
+                    { layout: 'base'});
                 }
             }
         ])
