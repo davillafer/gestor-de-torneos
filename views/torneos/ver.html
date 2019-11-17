@@ -2,7 +2,7 @@
 <section class="uk-section">
     <div class="uk-container">
         <h1 class = "uk-heading-medium">{{torneo.nombre}}</h1>
-        <p class="uk-text-large">Fecha de inicio de torneo: {{torneo.inicioInscripcion}}</p>
+        <p class="uk-text-large">El torneo comienza el {{torneo.inicioInscripcion}}</p>
         <div class="uk-overflow-auto">
             <table class="uk-table uk-table-middle uk-table-divider">
                 <thead>
@@ -33,7 +33,7 @@
                         <ul class="tournament-bracket__list">
                             {{#each this}}
                             <li class="tournament-bracket__item">
-                                <div class="tournament-bracket__match" tabindex="0">
+                                <div id="{{this.equipoLocal}}!-!{{this.equipoVisitante}}" class="tournament-bracket__match" tabindex="0" >
                                     <table class="tournament-bracket__table">
                                         <caption class="tournament-bracket__caption">
                                             <time datetime="1998-02-18">{{this.fechaHora}}</time>
@@ -79,4 +79,25 @@
     </div>
 </section>
 {{/if}}
-
+<script>
+let match = undefined;
+const code = '<div class="uk-container"> <h1 class="uk-heading-small uk-align-center">Resultados</h1> <legend class="uk-legend uk-text-center">!TEAMS!</legend> <form method="POST" action="/" class="uk-grid-small" uk-grid><div class="uk-width-1-2"> <input class="uk-input" type="number" min="0" required> </div> <div class="uk-width-1-2"> <input class="uk-input" min="0" type="number" required> </div> <div class="uk-width-1-1 uk-margin-bottom"> <button class="uk-button uk-button-default">Guardar</button> </div> </form> </div>'
+UIkit.util.on('.tournament-bracket__match', 'click', function (e) {
+    match = e.path.find(el => el.id.includes('!-!')).id;
+    if(!!match){
+        if(match.toLowerCase().includes('determinar')){
+            match = undefined;
+            return;
+        }
+        e.preventDefault();
+        e.target.blur();
+        var teams = match.split('!-!')
+        UIkit.modal.dialog(code.replace('!TEAMS!',teams[0]+' - '+teams[1]));
+        var form  = document.getElementsByTagName('form')[0];
+        form.addEventListener("submit", function (event) {
+                event.preventDefault();
+        }, false);
+    }
+});
+</script>
+>>>>>>> 6644b348debbdbda658533f5d84e2f47dd9cf482
