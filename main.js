@@ -6,9 +6,11 @@ const Cookie = require('@hapi/cookie');
 const routes = require("./routes.js");
 const EquipoRepo = require("./repositories/EquipoRepo");
 const TorneoRepo = require("./repositories/TorneoRepo");
+const dotenv = require('dotenv');
+dotenv.config();
 // Servidor
 const server = Hapi.server({
-    port: 8080,
+    port: process.env.PORT, // USAR EL .ENV
     host: 'localhost',
 });
 

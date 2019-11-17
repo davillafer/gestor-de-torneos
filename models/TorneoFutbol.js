@@ -123,14 +123,21 @@ module.exports =  class TorneoFutbol {
 
     inscribir(equipo_id){
         this._equipos.forEach(id => {
-            if(id = equipo_id)
+            if(id == equipo_id)
                 throw new Error('El equipo ya está inscrito');
         })
-        equipos.push(equipo_id);            
+        this._equipos.push(equipo_id);            
     }
 
-    desInscribir(equipo){
-        
+    desInscribir(equipo){       
+        for (let index = 0; index < this._equipos.length; index++) {            
+            if (this._equipos[index] == equipo && new Date() < this._finInscripcion )
+            {
+                this._equipos.splice(index,1);          
+                return true;                                                                 
+            }
+        }
+        return false;
     }
     
     siguientePartido(){

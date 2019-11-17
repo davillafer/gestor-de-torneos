@@ -55,7 +55,41 @@ module.exports = {
         torneoRepo = server.methods.getTorneoRepo();
 
         server.route([
-            /* ELIMINAR TORNEOS */
+            /* DESAPUNTARSE DE UN TORNEO */
+            {
+                method: 'GET',
+                path: '/torneos/{id}/abandonar',
+                options: {
+                    auth: 'auth-registrado'
+                },
+                handler: async (req, h) => {
+                  
+                    let criterio = { "_id": ObjectID(req.params.id)};
+                    let torneoObjetivo = null;       
+                    let result =  null; 
+                    await torneoRepo.search(criterio).then((torneos) => {
+                        if (torneos) {
+                            torneoObjetivo =module.exports.getTorneo(torneos[0])
+                        } else {
+                            result = h.redirect('/torneos/inscrito?mensaje=El torneo no existe&tipoMensaje=danger');
+                        }
+                    });
+                   
+                   //desapuntarse
+                    let done = torneoObjetivo.desInscribir(req.auth.credentials);
+                   //
+                   result = done ? h.redirect('/torneos?mensaje=Se te ha desapuntado del torneo&tipoMensaje=success') :h.redirect('/torneos?mensaje=No se te ha podido desapuntar&tipoMensaje=danger');
+
+                    await torneoRepo.update(torneoObjetivo).then((res) => {                                                       
+                        if(!res) // si fue mal
+                            result = h.redirect('/torneos?mensaje=No se ha podido desapuntarse&tipoMensaje=danger');
+                        // si salió bien devolverá lo que ya viene de la 'lógica';
+                    });
+                    return result;
+
+                }
+            },
+            /* CANCELAR TORNEOS */
             {
                 method: 'GET',
                 path: '/torneos/{id}/eliminar',
@@ -133,12 +167,9 @@ module.exports = {
                         if (equipo === req.state["session-id"].usuario)
                             return h.redirect('/torneos?mensaje=Ya se ha unido al torneo&tipoMensaje=danger');
                     });
-                    // Comprobar si aun pueden inscribirse
-                    let ahora = module.exports.getFechaBonita(new Date());
-                    if (ahora < torneo.finInscripcion || ahora < torneo.inicioInscripcion)
-                        torneo.equipos.push(req.state["session-id"].usuario);
-                    else
-                        return h.redirect('/torneos?mensaje=No permite inscripciones el torneo&tipoMensaje=danger');
+                    
+                    torneo.inscribir(req.auth.credentials)
+
                     // Actualizar bd
                     let result = null;
                     await torneoRepo.update(torneo).then((res) => {
@@ -201,6 +232,19 @@ module.exports = {
                                         torneo.partidos.push(partido)
                                     }
                                 }
+                                if (equipoAnterior != undefined){
+                                    let resultado = {
+                                        golesEquipoLocal : "-",
+                                        golesEquipoVisitante : "-"
+                                    };
+                                    let partido = {
+                                        equipoLocal: equipoAnterior,
+                                        equipoVisitante: "-",
+                                        resultado : resultado,
+                                        fechaHora : module.exports.getFechaHoraBonita(fecha),
+                                    };
+                                    torneo.partidos.push(partido)
+                                }
                                 let columna = torneo.partidos.length;
                                 while (columna > 1) {
                                     fecha.setDate(fecha.getDate() +1 );
@@ -237,11 +281,21 @@ module.exports = {
                                 } else {
                                     while (true) {
                                         if (auxTorneos.length == 0) {
-                                            let half = Math.floor(torneo.partidos.length / 2) + 1;
+                                            let half;
+                                            if (torneo.partidos.length % 2 != 0) {
+                                                half = Math.floor(torneo.partidos.length / 2) + 1;
+                                            } else {
+                                                half = Math.floor(torneo.partidos.length / 2);
+                                            }
                                             partidos.push(torneo.partidos.slice(0, half));
                                             auxTorneos = torneo.partidos.slice(half, torneo.partidos.length);
                                         } else {
-                                            let half = Math.floor(auxTorneos.length / 2) + 1;
+                                            let half;
+                                            if (auxTorneos.length % 2 != 0) {
+                                                half = Math.floor(auxTorneos.length / 2) + 1;
+                                            } else {
+                                                half = Math.floor(auxTorneos.length / 2);
+                                            }
                                             partidos.push(auxTorneos.slice(0, half));
                                             auxTorneos = auxTorneos.slice(half, auxTorneos.length);
                                         }
@@ -259,22 +313,33 @@ module.exports = {
                             partidos.push(torneo.partidos);
                         } else {
                             while(true){
-                                if (auxTorneos.length == 0){
-                                    let half = Math.floor(torneo.partidos.length / 2) +1;
+                                if (auxTorneos.length == 0) {
+                                    let half;
+                                    if (torneo.partidos.length % 2 != 0) {
+                                        half = Math.floor(torneo.partidos.length / 2) + 1;
+                                    } else {
+                                        half = Math.floor(torneo.partidos.length / 2);
+                                    }
                                     partidos.push(torneo.partidos.slice(0, half));
                                     auxTorneos = torneo.partidos.slice(half, torneo.partidos.length);
                                 } else {
-                                    let half = Math.floor(auxTorneos.length / 2) +1;
+                                    let half;
+                                    if (auxTorneos.length % 2 != 0) {
+                                        half = Math.floor(auxTorneos.length / 2) + 1;
+                                    } else {
+                                        half = Math.floor(auxTorneos.length / 2);
+                                    }
                                     partidos.push(auxTorneos.slice(0, half));
                                     auxTorneos = auxTorneos.slice(half, auxTorneos.length);
                                 }
-                                if (auxTorneos.length == 1){
+                                if (auxTorneos.length == 1) {
                                     partidos.push(auxTorneos);
                                     break;
                                 }
                             }
                         }
                     }
+                    torneo.inicioInscripcion = module.exports.getFechaHoraBonita(torneo.inicioInscripcion)
                     return h.view('torneos/ver',
                         {
                             torneo: torneo,

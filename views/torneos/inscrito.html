@@ -8,6 +8,7 @@
                         <th class="uk-table-expand">Nombre</th>
                         <th class="uk-table-expand">Creador</th>                        
                         <th class="uk-table-expand">Fin Inscripcion</th>                        
+                        <th class="uk-width-small">Opciones</th>         
                     </tr>
                     </thead>
                     <tbody>
@@ -17,7 +18,13 @@
                             {{ nombre }}
                         </a></td>
                         <td >{{ creador }}</td>
-                        <td >{{ finInscripcion }}</td>                      
+                        <td >{{ finInscripcion }}</td>       
+                        <td>
+                            <a class="uk-link" href="/torneos/{{_id}}/abandonar">
+                                <span  uk-icon="trash"></span>
+                                Abandonar
+                            </a>
+                     </td>
                     </tr>
                     {{/each}}
                     </tbody>
