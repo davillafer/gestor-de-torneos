@@ -123,10 +123,10 @@ module.exports =  class TorneoFutbol {
 
     inscribir(equipo_id){
         this._equipos.forEach(id => {
-            if(id = equipo_id)
+            if(id == equipo_id)
                 throw new Error('El equipo ya está inscrito');
         })
-        equipos.push(equipo_id);            
+        this._equipos.push(equipo_id);            
     }
 
     desInscribir(equipo){       

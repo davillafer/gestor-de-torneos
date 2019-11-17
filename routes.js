@@ -167,12 +167,9 @@ module.exports = {
                         if (equipo === req.state["session-id"].usuario)
                             return h.redirect('/torneos?mensaje=Ya se ha unido al torneo&tipoMensaje=danger');
                     });
-                    // Comprobar si aun pueden inscribirse
-                    let ahora = module.exports.getFechaBonita(new Date());
-                    if (ahora < torneo.finInscripcion || ahora < torneo.inicioInscripcion)
-                        torneo.equipos.push(req.state["session-id"].usuario);
-                    else
-                        return h.redirect('/torneos?mensaje=No permite inscripciones el torneo&tipoMensaje=danger');
+                    
+                    torneo.inscribir(req.auth.credentials)
+
                     // Actualizar bd
                     let result = null;
                     await torneoRepo.update(torneo).then((res) => {
