@@ -13,7 +13,7 @@ module.exports =  class TorneoRepo extends AbsRepo{
         let db = await this.conexion();
         return new Promise((resolve, reject) => {
             var collection = db.collection(this.getCollection());
-            collection.updateOne({"torneo": entity.torneo}, {$set: entity}, (err, result) => {
+            collection.updateOne({"_id": entity._id}, {$set: entity}, (err, result) => {
                 if (err) {
                     resolve(null);
                 } else {

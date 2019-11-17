@@ -126,8 +126,8 @@ module.exports = {
                         return h.redirect('/torneos?mensaje=Ya no permite inscripciones el torneo&tipoMensaje=danger');
                     // Actualizar bd
                     let result = null;
-                    await torneoRepo.update(torneo).then((result) => {
-                        if(result)
+                    await torneoRepo.update(torneo).then((res) => {
+                        if(res)
                             result = h.redirect('/torneos?mensaje=Se ha unido al torneo&tipoMensaje=success');
                         else
                             result = h.redirect('/torneos?mensaje=No se ha podido unirse&tipoMensaje=danger');
