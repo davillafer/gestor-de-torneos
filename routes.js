@@ -189,7 +189,7 @@ module.exports = {
 
                     var partidos = [];
                     if (torneo.partidos.length == 0){
-                        if (false){
+                        if (true){
                             var equipos = torneo.equipos;
                             var equiposLenght = equipos.length;
                             var equipoAnterior = undefined;
@@ -203,21 +203,33 @@ module.exports = {
                                         equipoLocal : equipoAnterior,
                                         equipoVisitante : equipos[number]
                                     };
-                                    equipoAnterior = undefined
+                                    equipoAnterior = undefined;
                                     equipos.splice(number, 1);
                                     torneo.partidos.push(partido)
                                 }
                             }
+                            var nPartidos = torneo.partidos.length;
+                            for(var i = 0; i < nPartidos; i += 2){
+                                var partido = {
+                                    equipoLocal : "Por Determinar",
+                                    equipoVisitante : "Por Determinar"
+                                };
+                                torneo.partidos.push(partido)
+                            }
+
+                            await torneoRepo.update(torneo).then((id) => {
+                            });
+
 
 
                             var auxTorneos = [];
                             while(true){
                                 if (auxTorneos.length == 0){
-                                    let half = Math.floor(torneo.partidos.length / 2);
+                                    let half = Math.floor(torneo.partidos.length / 2) +1;
                                     partidos.push(torneo.partidos.slice(0, half));
                                     auxTorneos = torneo.partidos.slice(half, torneo.partidos.length);
                                 } else {
-                                    let half = Math.floor(auxTorneos.length / 2);
+                                    let half = Math.floor(auxTorneos.length / 2) +1;
                                     partidos.push(auxTorneos.slice(0, half));
                                     auxTorneos = auxTorneos.slice(half, auxTorneos.length);
                                 }
@@ -232,11 +244,11 @@ module.exports = {
                         auxTorneos = [];
                         while(true){
                             if (auxTorneos.length == 0){
-                                let half = Math.floor(torneo.partidos.length / 2);
+                                let half = Math.floor(torneo.partidos.length / 2) +1;
                                 partidos.push(torneo.partidos.slice(0, half));
                                 auxTorneos = torneo.partidos.slice(half, torneo.partidos.length);
                             } else {
-                                let half = Math.floor(auxTorneos.length / 2);
+                                let half = Math.floor(auxTorneos.length / 2) +1;
                                 partidos.push(auxTorneos.slice(0, half));
                                 auxTorneos = auxTorneos.slice(half, auxTorneos.length);
                             }

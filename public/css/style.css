@@ -18,13 +18,11 @@
     border: 1px grey solid;
 }
 
+
 *,
 *::before,
 *::after {
   box-sizing: border-box;
-}
-html {
-  font-size: 15px;
 }
 @media (min-width: 38em) {
   html {
@@ -41,29 +39,18 @@ html {
     font-size: 16px;
   }
 }
-body {
-  background-color: #f1f1f1;
-  font-family: 'Work Sans', 'Helvetica Neue', Arial, sans-serif;
+
+.bracket{
+    background-color: #f1f1f1;
+    font-family: 'Work Sans', 'Helvetica Neue', Arial, sans-serif;
 }
+
 .container {
   width: 90%;
   min-width: 18em;
   margin: 20px auto;
 }
-h1,
-h2 {
-  text-align: center;
-}
-h1 {
-  font-size: 2rem;
-  font-weight: 700;
-  margin-bottom: 0.5em;
-}
-h2 {
-  font-size: 1.4rem;
-  font-weight: 600;
-  margin-bottom: 2em;
-}
+
 .sr-only {
   position: absolute;
   width: 1px;
