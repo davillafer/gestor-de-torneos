@@ -187,14 +187,14 @@ module.exports = {
                                         equipos.splice(number, 1);
                                     } else {
                                         let resultado = {
-                                            golesEquipoLocal : 0,
-                                            golesEquipoVisitante : 0
+                                            golesEquipoLocal : "-",
+                                            golesEquipoVisitante : "-"
                                         };
                                         let partido = {
                                             equipoLocal: equipoAnterior,
                                             equipoVisitante: equipos[number],
                                             resultado : resultado,
-                                            fecha : module.exports.getFechaHoraBonita(fecha),
+                                            fechaHora : module.exports.getFechaHoraBonita(fecha),
                                         };
                                         equipoAnterior = undefined;
                                         equipos.splice(number, 1);
@@ -208,13 +208,14 @@ module.exports = {
                                     columna = 0;
                                     for (let i = 0; i < elementosColumna; i+=2) {
                                         let resultado = {
-                                            golesEquipoLocal : 0,
-                                            golesEquipoVisitante : 0
+                                            golesEquipoLocal : "-",
+                                            golesEquipoVisitante : "-"
                                         };
                                         let partido = {
                                             equipoLocal: "Por Determinar",
                                             equipoVisitante: "Por Determinar",
-                                            fecha : module.exports.getFechaHoraBonita(fecha),
+                                            resultado : resultado,
+                                            fechaHora : module.exports.getFechaHoraBonita(fecha),
                                         };
 
                                         columna++;
