@@ -347,6 +347,7 @@ module.exports = {
                             torneo: torneo,
                             partidos: partidos,
                             usuarioAutenticado: req.state["session-id"].usuario,
+                            isOwner: torneo.creador === req.state["session-id"].usuario ? 'true':'false'
                         },
                         {layout: 'base'});
                 }
