@@ -194,7 +194,7 @@ module.exports = {
                             var equiposLenght = equipos.length;
                             var equipoAnterior = undefined;
                             for(var i = 0; i < equiposLenght; i++){
-                                var number = Math.floor(Math.random() * (equipos.length - 0)) + 0;
+                                var number = Math.floor(Math.random() * (equipos.length));
                                 if (equipoAnterior == undefined){
                                     equipoAnterior = equipos[number];
                                     equipos.splice(number, 1);
