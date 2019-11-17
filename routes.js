@@ -204,16 +204,19 @@ module.exports = {
                                 torneo.partidos.push(partido)
                             }
                         }
-                        let nPartidos = torneo.partidos.length;
-                        for(let i = 0; i < nPartidos; i += 2){
-                            let partido = {
-                                equipoLocal : "Por Determinar",
-                                equipoVisitante : "Por Determinar"
-                            };
-                            torneo.partidos.push(partido)
+                        let columna = torneo.partidos.length;
+                        while(columna > 1) {
+                            for (let i = 0; i < columna; i += 2) {
+                                let partido = {
+                                    equipoLocal: "Por Determinar",
+                                    equipoVisitante: "Por Determinar"
+                                };
+                                columna = 0;
+                                columna++;
+                                torneo.partidos.push(partido)
+                            }
                         }
                         await torneoRepo.update(torneo).then((id) => {
-                            // TODO
                             if(id){
 
                             } else {
@@ -221,36 +224,44 @@ module.exports = {
                             }
                         });
                         let auxTorneos = [];
-                        while(true){
-                            if (auxTorneos.length == 0){
-                                let half = Math.floor(torneo.partidos.length / 2) +1;
-                                partidos.push(torneo.partidos.slice(0, half));
-                                auxTorneos = torneo.partidos.slice(half, torneo.partidos.length);
-                            } else {
-                                let half = Math.floor(auxTorneos.length / 2) +1;
-                                partidos.push(auxTorneos.slice(0, half));
-                                auxTorneos = auxTorneos.slice(half, auxTorneos.length);
-                            }
-                            if (auxTorneos.length == 1){
-                                partidos.push(auxTorneos);
-                                break;
+                        if (torneo.partidos.length == 1){
+                            partidos = torneo.partidos;
+                        } else {
+                            while(true){
+                                if (auxTorneos.length == 0){
+                                    let half = Math.floor(torneo.partidos.length / 2) +1;
+                                    partidos.push(torneo.partidos.slice(0, half));
+                                    auxTorneos = torneo.partidos.slice(half, torneo.partidos.length);
+                                } else {
+                                    let half = Math.floor(auxTorneos.length / 2) +1;
+                                    partidos.push(auxTorneos.slice(0, half));
+                                    auxTorneos = auxTorneos.slice(half, auxTorneos.length);
+                                }
+                                if (auxTorneos.length == 1){
+                                    partidos.push(auxTorneos);
+                                    break;
+                                }
                             }
                         }
                     } else {
-                        auxTorneos = [];
-                        while(true){
-                            if (auxTorneos.length == 0){
-                                let half = Math.floor(torneo.partidos.length / 2) +1;
-                                partidos.push(torneo.partidos.slice(0, half));
-                                auxTorneos = torneo.partidos.slice(half, torneo.partidos.length);
-                            } else {
-                                let half = Math.floor(auxTorneos.length / 2) +1;
-                                partidos.push(auxTorneos.slice(0, half));
-                                auxTorneos = auxTorneos.slice(half, auxTorneos.length);
-                            }
-                            if (auxTorneos.length == 1){
-                                partidos.push(auxTorneos);
-                                break;
+                        let auxTorneos = [];
+                        if (torneo.partidos.length == 1){
+                            partidos = torneo.partidos;
+                        } else {
+                            while(true){
+                                if (auxTorneos.length == 0){
+                                    let half = Math.floor(torneo.partidos.length / 2) +1;
+                                    partidos.push(torneo.partidos.slice(0, half));
+                                    auxTorneos = torneo.partidos.slice(half, torneo.partidos.length);
+                                } else {
+                                    let half = Math.floor(auxTorneos.length / 2) +1;
+                                    partidos.push(auxTorneos.slice(0, half));
+                                    auxTorneos = auxTorneos.slice(half, auxTorneos.length);
+                                }
+                                if (auxTorneos.length == 1){
+                                    partidos.push(auxTorneos);
+                                    break;
+                                }
                             }
                         }
                     }
