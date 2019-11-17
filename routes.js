@@ -614,6 +614,49 @@ module.exports = {
                     },
                     { layout: 'base'});
                 }
+            },
+            /* VER ESTADÍSTICAS */
+            {
+                method: 'GET',
+                path: '/torneos/{id}/stats',
+                options: {
+                    auth: 'auth-registrado'
+                },
+                handler: async (req, h) => {
+                    // Criterio de búsqueda
+                    let criteria = {"_id": require("mongodb").ObjectID(req.params.id)};
+                    // Buscamos con paginación
+                    let torneo = await torneoRepo.search(criteria).then(torneos => {
+                        return torneos[0];
+                    });
+                    // Transformar a objetos de nuestro modelo
+                    torneo = module.exports.getTorneo(torneo);
+
+                    // TODO: transformar los equipos al modelo y cambiar las stats
+                    // let equipos = module.exports.getEquipos(torneo.equipos);
+
+                    // Calcular stats
+                    let equipos = [];
+                    torneo.equipos.forEach(equipo => {
+                        let golesFavor = 0;
+                        let golesContra = 0;
+                        // TODO: foreach partido buscar el equipo y añadir a los counters
+                        let diferencia = golesFavor - golesContra;
+                        equipos.push({
+                            nombre: equipo,
+                            golesFavor: golesFavor,
+                            golesContra: golesContra,
+                            diferencia: diferencia
+                        });
+                    });
+                    // Obtenemos la vista
+                    return h.view('torneos/stats',
+                        {
+                            equipos,
+                            usuarioAutenticado: req.auth.credentials
+                        },
+                        {layout: 'base'});
+                }
             }
         ])
     }
