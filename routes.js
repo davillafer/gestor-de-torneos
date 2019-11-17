@@ -484,6 +484,7 @@ module.exports = {
                     return respuesta;
                 }
             },
+            /* VER TORNEOS CREADOS*/
             {
                 method: 'GET',
                 path: '/torneos/creados',
@@ -491,48 +492,46 @@ module.exports = {
                     auth: 'auth-registrado'
                 },
                 handler: async (req, h) => {
-
-                    var pg = parseInt(req.query.pg); 
-                    if ( req.query.pg == null){ // Puede no venir el param
+                    // Paginación
+                    let pg = parseInt(req.query.pg);
+                    let pgUltima = 0;
+                    // Puede no venir el param
+                    if ( req.query.pg === null){
                         pg = 1;
                     }
-
-                    var criterio = { "creador" : req.auth.credentials };
-                    // cookieAuth
-
-                    await torneoRepo.searchPg(pg, criterio)
-                        .then((torneos, total) => {
-                             totalTorneos = torneos;
-                            pgUltima = totalTorneos.total/2;
-
-                            // La págian 2.5 no existe
-                            // Si excede sumar 1 y quitar los decimales
-                            if (pgUltima % 2 > 0 ){
-                                pgUltima = Math.trunc(pgUltima);
-                                pgUltima = pgUltima+1;
-                            }
-                        })
-
-                    totalTorneos.forEach(torneo => {
+                    // Criterio de búsqueda
+                    let criteria = { _creador : req.state['session-id'].usuario };
+                    // Buscamos con paginación
+                    let torneos = await torneoRepo.searchPg(pg, criteria).then(torneos => {
+                        pgUltima = torneos.total/2;
+                        if (pgUltima % 2 > 0 ){
+                            pgUltima = Math.trunc(pgUltima);
+                            pgUltima = pgUltima+1;
+                        }
+                        return torneos;
+                    });
+                    // Transformar a objetos de nuestro modelo
+                    torneos = module.exports.getTorneos(torneos);
+                    // Cambiar el estilo de las fechas
+                    torneos.forEach(torneo => {
                         torneo.inicioInscripcion = module.exports.getFechaBonita(torneo.inicioInscripcion);
                         torneo.finInscripcion = module.exports.getFechaBonita(torneo.finInscripcion);
-                    })
-
-
-                    var paginas = [];
-                    for( i=1; i <= pgUltima; i++){
-                        if ( i == pg ){
-                            paginas.push({valor: i , clase : "uk-active" });
+                    });
+                    // Paginación
+                    let paginas = [];
+                    for (let i=1; i <= pgUltima; i++){
+                        if ( i === pg ){
+                            paginas.push({valor: i , clase: "uk-active" });
                         } else {
                             paginas.push({valor: i});
                         }
                     }
-                    
+                    // Obtenemos la vista
                     return h.view('torneos/mistorneos',
                         {
-                            torneos: totalTorneos,
-                            usuarioAutenticado: req.auth.credentials,
-                            paginas : paginas
+                            torneos,
+                            usuarioAutenticado: req.state['session-id'].usuario,
+                            paginas
                         },
                         { layout: 'base'} );
                 }
