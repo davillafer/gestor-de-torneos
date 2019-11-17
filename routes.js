@@ -741,6 +741,18 @@ module.exports = {
                     torneo.equipos.forEach(equipo => {
                         let golesFavor = 0;
                         let golesContra = 0;
+                        torneo.partidos.forEach(partido =>{
+                            if((partido.equipoLocal === equipo || partido.equipoVisitante === equipo)&&typeof(partido.resultado.golesEquipoLocal) == 'number'
+                            && typeof(partido.resultado.golesEquipoVisitante) == 'number'){
+                                if(partido.equipoLocal === equipo){
+                                    golesFavor += partido.resultado.golesEquipoLocal;
+                                    golesContra += partido.resultado.golesEquipoVisitante;
+                                }else{
+                                    golesFavor += partido.resultado.golesEquipoVisitante;
+                                    golesContra += partido.resultado.golesEquipoLocal;
+                                }
+                            }
+                        });
                         // TODO: foreach partido buscar el equipo y añadir a los counters
                         let diferencia = golesFavor - golesContra;
                         equipos.push({
@@ -753,6 +765,7 @@ module.exports = {
                     // Obtenemos la vista
                     return h.view('torneos/stats',
                         {
+                            torneo,
                             equipos,
                             usuarioAutenticado: req.auth.credentials
                         },
