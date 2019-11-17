@@ -6,35 +6,6 @@ const TorneoFutbol = require('./models/TorneoFutbol');
 
 module.exports = {
     name: 'MiRouter',
-    utilSubirFichero : async (binario, nombre, extension) => {
-        return new Promise((resolve, reject) => {
-            nombre = nombre + "." + extension;
-            require('fs').writeFile('./public/subidas/'+nombre, binario, err => {
-                if (err) {
-                    resolve(false)
-                }
-                resolve(true)
-            })
-        })
-    },
-    getUsuarioIdentificado(req){
-        if(req.auth.credentials !== null){
-            return req.auth.credentials;
-        }else if(req.state['session-id'] != null && req.state['session-id'].usuario !=""){
-            return req.state['session-id'].usuario;
-        }else{
-            return null;
-        }
-    },
-    getIdUsuarioIdentificado(req){
-        if(req.auth.credentials !== null){
-            return req.auth.credentials;
-        }else if(req.state['session-id'] != null && req.state['session-id'].usuario !=""){
-            return req.state['session-id']; // TODO: Hay que sacar el id de la base de datos
-        }else{
-            return null;
-        }
-    },
     getFechaBonita(fecha){
         if(!fecha instanceof Date){
             return fecha;
@@ -598,28 +569,13 @@ module.exports = {
             },
             {
                 method: 'GET',
-                path: '/anuncio/{id}',
-                handler: async  (req, h) => {
-                    return 'Anuncio id: ' + req.params.id;
-                }
-            },
-            {
-                method: 'GET',
                 path: '/',
                 handler: async (req, h) => {
-                    
                     return h.view('index',
-                        {
-                            usuarioAutenticado: module.exports.getUsuarioIdentificado(req),
-                            usuarioIdentificadoId: module.exports.getIdUsuarioIdentificado(req)
-                        },
-                        { layout: 'base'});
-                }
-            },{
-                method: 'GET',
-                path: '/api/',
-                handler: async (req, h) => {
-                    return  {usuarioAutenticado: module.exports.getUsuarioIdentificado(req)};
+                    {
+                        usuarioAutenticado: req.state['session-id'].usuario
+                    },
+                    { layout: 'base'});
                 }
             }
         ])
