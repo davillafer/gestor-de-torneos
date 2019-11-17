@@ -269,89 +269,96 @@ module.exports = {
                     view: 'layout/base'
                 }
             },
+            /* REGISTRO DEL USUARIO */
             {
                 method: 'GET',
                 path: '/registro',
                 handler: async (req, h) => {
+                    // Obtener vista
                     return h.view('registro',
                         { },
                         { layout: 'base'});
                 }
             },
+            /* LOGIN DEL USUARIO */
             {
                 method: 'GET',
                 path: '/login',
                 handler: async (req, h) => {
+                    // Obtener vista
                     return h.view('login',
                         { },
                         { layout: 'base'});
                 }
             },
+            /* CERRAR SESIÓN DEL USUARIO */
             {
                 method: 'GET',
                 path: '/desconectarse',
                 handler: async (req, h) => {
+                    // Quitamos la cookie de la sesión
                     req.cookieAuth.set({ usuario: "", secreto: "" });
+                    // Obtenemos la vista
                     return h.view('login',
                         { },
                         { layout: 'base'});
                 }
             },
+            /* LOGIN DEL USUARIO */
             {
                 method: 'POST',
                 path: '/login',
                 handler: async (req, h) => {
-                    password = require('crypto').createHmac('sha256', 'secreto')
+                    // Transformamos la contraseña del usuario
+                    let password = require('crypto').createHmac('sha256', 'secreto')
                         .update(req.payload.password).digest('hex');
-
-                    usuarioBuscar = {
+                    // Criterio de búsqueda
+                    let criteria = {
                         usuario: req.payload.usuario,
                         password: password,
-                    }
-
-                    // await no continuar hasta acabar esto
-                    // Da valor a respuesta
-
-                    await equipoRepo.search(usuarioBuscar).then((usuarios) => {
+                    };
+                    // Obtenemos el usuario
+                    let respuesta = null;
+                    await equipoRepo.search(criteria).then((usuarios) => {
                         respuesta = "";
-                        if (usuarios == null || usuarios.length == 0 ) {
-                            respuesta =  h.redirect('/login?mensaje=Usuario o password incorrecto&tipoMensaje=danger')
+                        if (usuarios === null || usuarios.length === 0 ) {
+                            respuesta =  h.redirect('/login?mensaje=Usuario o password incorrecto&tipoMensaje=danger');
                         } else {
                             req.cookieAuth.set({
                                 usuario: usuarios[0].usuario,
                                 secreto : "secreto"
                             });
-                            respuesta = h.redirect('/')
+                            respuesta = h.redirect('/');
 
                         }
-                    })
+                    });
                     return respuesta;
                 }
             },
+            /* REGISTRO DEL USUARIO */
             {
                 method: 'POST',
                 path: '/registro',
                 handler: async (req, h) => {
-                    let respuesta;
-
                     // Comprobar que ambas contraseñas son iguales
                     if (req.payload.password !== req.payload.repassword)
                         return h.redirect('/registro?mensaje="Passwords distintas"'); // Contraseña no salta, debe ser por la 'ñ'
-
+                    // Transformamos la contraseña del usuario
                     let password = require('crypto').createHmac('sha256', 'secreto')
                         .update(req.payload.password).digest('hex');
-
+                    // Usuario
                     let usuario = {
                         usuario: req.payload.usuario,
                         nombre: req.payload.nombre,
                         color: req.payload.color,
                         password: password
-                    }
-
+                    };
+                    // Buscamos al usuario para comprobar si ya existe
                     await equipoRepo.search({'usuario': usuario.usuario}).then( async (result) => {
                        if (result.length !== 0) {
                            respuesta =  h.redirect('/registro?mensaje="Usuario no disponible"');
                        } else {
+                           // Guardamos al usuario en la bd
                            await equipoRepo.save(usuario).then((id) => {
                                respuesta = "";
                                if (id == null) {
@@ -362,7 +369,6 @@ module.exports = {
                            });
                        }
                     });
-
                     return respuesta;
                 }
             },
