@@ -372,6 +372,7 @@ module.exports = {
                     return respuesta;
                 }
             },
+            /* VER PERfil DEL USUARIO */
             {
                 method: 'GET',
                 path: '/perfil',
@@ -380,16 +381,15 @@ module.exports = {
                 },
                 handler: async (req, h) => {
                     // Obtenemos la información del usuario
-                    let user = await equipoRepo.search({ 'usuario': req.state['session-id'].usuario })
-                        .then( async result => {
-                            if (result) {
-                                return result[0];
-                            } else {
-                                return null;
-                            }
+                    let user = await equipoRepo.search({ 'usuario': req.state['session-id'].usuario }).then( async result => {
+                        if (result) {
+                            return result[0];
+                        } else {
+                            return null;
+                        }
                     });
                     // Comprobamos si hay error
-                    if ( user ) {
+                    if (user) {
                         return h.view('usuario/perfil',
                             {
                                 user,
@@ -401,18 +401,19 @@ module.exports = {
                     }
                 }
             },
+            /* MODIFICAR PERFIL */
             {
                 method: 'POST',
                 path: '/perfil',
                 handler: async (req, h) => {
-                    let respuesta;
-
                     let usuario = {
                         usuario: req.payload.usuario,
                         nombre: req.payload.nombre,
                         color: req.payload.color
-                    }
+                    };
 
+                    // Modificamos el usuario
+                    let respuesta = null;
                     await equipoRepo.update(usuario).then((id) => {
                         if (id == null) {
                             respuesta =  h.redirect('/perfil?mensaje="Error al modificar"')
@@ -424,6 +425,7 @@ module.exports = {
                     return respuesta;
                 }
             },
+            /* CREAR TORNEOS */
             {
                 method: 'GET',
                 path: '/torneos/crear',
@@ -431,18 +433,22 @@ module.exports = {
                     auth: 'auth-registrado'
                 },
                 handler: async (req, h) => {
+                    // Posible número de equipos
                     let numEquipos = [2, 4, 8, 16, 32];
+                    // Categorías disponibles
                     let categoria = categorias.categorias;
+                    // Obtenemos la vista
                     return h.view('torneos/crear',
                         {
                             categoria,
                             numEquipos,
-                            usuarioAutenticado: req.auth.credentials,
+                            usuarioAutenticado: req.state['session-id'].usuario,
                         },
                         { layout: 'base'}
                     );
                 }
             },
+            /* CREAR TORNEO */
             {
                 method: 'POST',
                 path: '/torneos/crear',
@@ -452,12 +458,10 @@ module.exports = {
                 handler: async (req, h) => {
                     // Creamos el torneo
                     let torneo = futbolFactory.crearTorneo();
-
                     // Obtener valores del usuarios
                     let fin = new Date(req.payload.fecha);
                     let empieza = new Date(req.payload.fecha);
                     empieza.setDate(empieza.getDate() - 10);
-
                     torneo.nombre = req.payload.nombre;
                     torneo.numEquipos = req.payload.nEquipos;
                     torneo.categoria = req.payload.categoria;
@@ -467,8 +471,7 @@ module.exports = {
                     torneo.equipos = [];
                     torneo.partidos = [];
                     torneo.creador = req.state['session-id'].usuario;
-
-                    // Guardar el torneo en la bd
+                    // Guardamos el torneo en la bd
                     let respuesta = null;
                     await torneoRepo.save(torneo).then((id) => {
                         respuesta = "";
@@ -478,8 +481,6 @@ module.exports = {
                             respuesta = h.redirect('/?mensaje=Torneo creado');
                         }
                     });
-
-                    // Mostrar la vista
                     return respuesta;
                 }
             },
