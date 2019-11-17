@@ -232,6 +232,19 @@ module.exports = {
                                         torneo.partidos.push(partido)
                                     }
                                 }
+                                if (equipoAnterior != undefined){
+                                    let resultado = {
+                                        golesEquipoLocal : "-",
+                                        golesEquipoVisitante : "-"
+                                    };
+                                    let partido = {
+                                        equipoLocal: equipoAnterior,
+                                        equipoVisitante: "-",
+                                        resultado : resultado,
+                                        fechaHora : module.exports.getFechaHoraBonita(fecha),
+                                    };
+                                    torneo.partidos.push(partido)
+                                }
                                 let columna = torneo.partidos.length;
                                 while (columna > 1) {
                                     fecha.setDate(fecha.getDate() +1 );
@@ -268,11 +281,21 @@ module.exports = {
                                 } else {
                                     while (true) {
                                         if (auxTorneos.length == 0) {
-                                            let half = Math.floor(torneo.partidos.length / 2) + 1;
+                                            let half;
+                                            if (torneo.partidos.length % 2 != 0) {
+                                                half = Math.floor(torneo.partidos.length / 2) + 1;
+                                            } else {
+                                                half = Math.floor(torneo.partidos.length / 2);
+                                            }
                                             partidos.push(torneo.partidos.slice(0, half));
                                             auxTorneos = torneo.partidos.slice(half, torneo.partidos.length);
                                         } else {
-                                            let half = Math.floor(auxTorneos.length / 2) + 1;
+                                            let half;
+                                            if (auxTorneos.length % 2 != 0) {
+                                                half = Math.floor(auxTorneos.length / 2) + 1;
+                                            } else {
+                                                half = Math.floor(auxTorneos.length / 2);
+                                            }
                                             partidos.push(auxTorneos.slice(0, half));
                                             auxTorneos = auxTorneos.slice(half, auxTorneos.length);
                                         }
@@ -290,22 +313,33 @@ module.exports = {
                             partidos.push(torneo.partidos);
                         } else {
                             while(true){
-                                if (auxTorneos.length == 0){
-                                    let half = Math.floor(torneo.partidos.length / 2) +1;
+                                if (auxTorneos.length == 0) {
+                                    let half;
+                                    if (torneo.partidos.length % 2 != 0) {
+                                        half = Math.floor(torneo.partidos.length / 2) + 1;
+                                    } else {
+                                        half = Math.floor(torneo.partidos.length / 2);
+                                    }
                                     partidos.push(torneo.partidos.slice(0, half));
                                     auxTorneos = torneo.partidos.slice(half, torneo.partidos.length);
                                 } else {
-                                    let half = Math.floor(auxTorneos.length / 2) +1;
+                                    let half;
+                                    if (auxTorneos.length % 2 != 0) {
+                                        half = Math.floor(auxTorneos.length / 2) + 1;
+                                    } else {
+                                        half = Math.floor(auxTorneos.length / 2);
+                                    }
                                     partidos.push(auxTorneos.slice(0, half));
                                     auxTorneos = auxTorneos.slice(half, auxTorneos.length);
                                 }
-                                if (auxTorneos.length == 1){
+                                if (auxTorneos.length == 1) {
                                     partidos.push(auxTorneos);
                                     break;
                                 }
                             }
                         }
                     }
+                    torneo.inicioInscripcion = module.exports.getFechaHoraBonita(torneo.inicioInscripcion)
                     return h.view('torneos/ver',
                         {
                             torneo: torneo,
