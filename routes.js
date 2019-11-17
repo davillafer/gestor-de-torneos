@@ -1,6 +1,8 @@
 const categorias = require('./models/Categoria');
+const ObjectID = require("mongodb").ObjectID;
 const FutbolFactory = require('./factory/FutbolFactory');
 const futbolFactory = new FutbolFactory();
+const TorneoFutbol = require('./models/TorneoFutbol');
 
 module.exports = {
     name: 'MiRouter',
@@ -48,17 +50,26 @@ module.exports = {
             return `${fecha.getDate()}/${fecha.getMonth()+1}/${fecha.getFullYear()}`;
         }
     },
-    
+    getTorneos(list) {
+        let aux = [];
+        list.forEach(t => {
+           aux.push(module.exports.getTorneo(t));
+        });
+        return aux;
+    },
+    getTorneo(t) {
+        let aux = new TorneoFutbol(t._nombre, t._numEquipos, t._finInscripcion, t._inicioInscripcion, t._partidos, t._equipos, t._creador, t._categoria, t._visibilidad);
+        if (t._id)
+            aux._id = t._id;
+        return aux;
+    },
     register: async (server, options) => {
         miserver = server;        
         equipoRepo = server.methods.getEquipoRepo();
         torneoRepo = server.methods.getTorneoRepo();
 
-
-
-
-
         server.route([
+            /* ELIMINAR TORNEOS */
             {
                 method: 'GET',
                 path: '/torneos/{id}/eliminar',
@@ -66,55 +77,55 @@ module.exports = {
                     auth: 'auth-registrado'
                 },
                 handler: async (req, h) => {
-
-                    var criterio = { "_id" :
-                            require("mongodb").ObjectID(req.params.id) };
-
-                    await torneoRepo.delete(criterio)
-                        .then((resultado) => {
-                            console.log("Eliminado")
-                        })
-
-                        return h.redirect('/torneos/creados?mensaje=Torneo Eliminado')
+                    // Criterio de búsqueda
+                    let id = ObjectID(req.params.id);
+                    let criteria = { "_id" :  id};
+                    // Eliminar el torneo
+                    let result = null;
+                    await torneoRepo.delete(criteria).then((res) => {
+                        if (res) {
+                            result = h.redirect('/torneos/creados?mensaje=Torneo Eliminado');
+                        } else {
+                            result = h.redirect('/torneos/creados?mensaje=Error al eliminar');
+                        }
+                    });
+                    return result;
                 }
             },
+            /* TORNEOS EN LOS QUE EL USUARIO ESTÁ INCRITO */
             {
                 method: 'GET',
                 path: '/torneos/inscrito',
                 options: {
                     auth: 'auth-registrado'
                 },
-                handler: async (req, h) => {        
-
-                    var criterio = null;
-                    // cookieAuth
-
-                    await torneoRepo.search(criterio)
-                        .then((torneos) => {
-                             totalTorneos = torneos;                            
-                        });
-
-                    var torneosInscrito = [];
-                        
-                    totalTorneos.forEach(torneo => {
+                handler: async (req, h) => {
+                    // Obtener todos los torneos
+                    let totalTorneos = await torneoRepo.search({}).then((torneos) => {
+                         return torneos;
+                    });
+                    // Transformar a objetos de nuestro modelo
+                    totalTorneos = module.exports.getTorneos(totalTorneos);
+                    // Torneos en los que el usuario está inscrito
+                    let torneos = [];
+                    await totalTorneos.forEach(torneo => {
                         torneo.inicioInscripcion = module.exports.getFechaBonita(torneo.inicioInscripcion);
                         torneo.finInscripcion = module.exports.getFechaBonita(torneo.finInscripcion);
                         torneo.equipos.forEach(equipo => {
-                            if (equipo == req.auth.credentials)
-                            {
-                                torneosInscrito.push(torneo);
-                            }
-                        })
-                    })
-
+                            if (equipo === req.state["session-id"].usuario)
+                                torneos.push(torneo);
+                        });
+                    });
+                    // Devolver vista
                     return h.view('torneos/inscrito',
                         {
-                            torneos: torneosInscrito,
+                            torneos,
                             usuarioAutenticado: req.auth.credentials                            
                         },
                         { layout: 'base'} );
                 }
             },
+            /* UNIRSE A UN TORNEO */
             {
                 method: 'GET',
                 path: '/torneos/{id}/unirse',
@@ -123,123 +134,108 @@ module.exports = {
                     auth: 'auth-registrado'
                 },
                 handler: async (req, h) => {
-
-                   
-
-                    var criterio = {"_id": require("mongodb").ObjectID(req.params.id)};
-                    
-        
-                    await torneoRepo.search(criterio)
-                        .then((torneos) => {
-                            torneo = torneos[0];
+                    // Criterio de búsqueda
+                    let criteria = {"_id": require("mongodb").ObjectID(req.params.id)};
+                    // Buscar el torneo
+                    let torneo = await torneoRepo.search(criteria).then((torneos) => {
+                        return torneos[0];
                     });
-                    
-                    torneo.equipos.forEach(equipo_nombre => {
-                        if(equipo_nombre == req.auth.credentials)
-                        {
-                            respuesta = '/torneos?mensaje=Ya se ha unido al torneo&tipoMensaje=danger';
-                        }
+                    // Transformar a objetos de nuestro modelo
+                    torneo = module.exports.getTorneo(torneo);
+                    // Comprobar si ya se está inscrito
+                    torneo.equipos.forEach(equipo => {
+                        if (equipo === req.state["session-id"].usuario)
+                            return h.redirect('/torneos?mensaje=Ya se ha unido al torneo&tipoMensaje=danger');
                     });
-                    if(module.exports.getFechaBonita(new Date()) < torneo.finInscripcion)
-                        torneo.equipos.push(req.auth.credentials);
+                    // Comprobar si aun pueden inscribirse
+                    let ahora = new Date();
+                    if (ahora < torneo.finInscripcion)
+                        torneo.equipos.push(req.state["session-id"].usuario);
                     else
-                        respuesta = '/torneos?mensaje=Ya no permite inscripciones el torneo&tipoMensaje=danger';
-
-                    await torneoRepo.update(torneo) .then((result) => {
+                        return h.redirect('/torneos?mensaje=Ya no permite inscripciones el torneo&tipoMensaje=danger');
+                    // Actualizar bd
+                    let result = null;
+                    await torneoRepo.update(torneo).then((result) => {
                         if(result)
-                            respuesta ='/torneos?mensaje=Se ha unido al torneo&tipoMensaje=success';
+                            result = h.redirect('/torneos?mensaje=Se ha unido al torneo&tipoMensaje=success');
                         else
-                        {
-                           respuesta = '/torneos?mensaje=No se ha podido unirse&tipoMensaje=danger';                      
-                        }
-
-                });;
-
-                return h.redirect(respuesta);
-                    
-
-                    
+                            result = h.redirect('/torneos?mensaje=No se ha podido unirse&tipoMensaje=danger');
+                    });
+                    return result;
                 }
             },
+            /* VER UN TORNEO */
             {
                 method: 'GET',
                 path:
                     '/torneos/{id}/ver',
                 options:
-                    {
-                        auth: 'auth-registrado'
-                    },
+                {
+                    auth: 'auth-registrado'
+                },
                 handler: async (req, h) => {
 
-
-                    var criterio = {"_id": require("mongodb").ObjectID(req.params.id)};
-                    var torneo;
-
-                    ///HAZLO CON TORNEOREPO.SEARCH
-                    // await TorneoRepo.search(criterio)
-                    //     .then((torneos) => {
-                    //         torneo = torneos[0];
-                    //     });
-
-
-                    await torneoRepo.search(criterio)
-                        .then((torneos) => {
-                            torneo = torneos[0];
-                        });
-
-                    var partidos = [];
-                    if (torneo.partidos.length == 0){
-                        if (true){
-                            var equipos = torneo.equipos;
-                            var equiposLenght = equipos.length;
-                            var equipoAnterior = undefined;
-                            for(var i = 0; i < equiposLenght; i++){
-                                var number = Math.floor(Math.random() * (equipos.length));
-                                if (equipoAnterior == undefined){
-                                    equipoAnterior = equipos[number];
-                                    equipos.splice(number, 1);
-                                } else {
-                                    var partido = {
-                                        equipoLocal : equipoAnterior,
-                                        equipoVisitante : equipos[number]
-                                    };
-                                    equipoAnterior = undefined;
-                                    equipos.splice(number, 1);
-                                    torneo.partidos.push(partido)
-                                }
-                            }
-                            var nPartidos = torneo.partidos.length;
-                            for(var i = 0; i < nPartidos; i += 2){
-                                var partido = {
-                                    equipoLocal : "Por Determinar",
-                                    equipoVisitante : "Por Determinar"
+                    // Criterio de búsqueda
+                    let criteria = {"_id": require("mongodb").ObjectID(req.params.id)};
+                    // Obtener el torneo
+                    let torneo = await torneoRepo.search(criteria).then((torneos) => {
+                            return torneos[0];
+                    });
+                    // Transformar a objetos de nuestro modelo
+                    torneo = module.exports.getTorneo(torneo);
+                    // Partidos del torneo
+                    let partidos = [];
+                    if (torneo.partidos.length === 0){
+                        let equipos = torneo.equipos;
+                        let equiposLength = equipos.length;
+                        let equipoAnterior = undefined;
+                        for (let i = 0; i < equiposLength; i++){
+                            let number = Math.floor(Math.random() * equipos.length);
+                            if (equipoAnterior === undefined){
+                                equipoAnterior = equipos[number];
+                                equipos.splice(number, 1);
+                            } else {
+                                let partido = {
+                                    equipoLocal : equipoAnterior,
+                                    equipoVisitante : equipos[number]
                                 };
+                                equipoAnterior = undefined;
+                                equipos.splice(number, 1);
                                 torneo.partidos.push(partido)
                             }
+                        }
+                        let nPartidos = torneo.partidos.length;
+                        for(let i = 0; i < nPartidos; i += 2){
+                            let partido = {
+                                equipoLocal : "Por Determinar",
+                                equipoVisitante : "Por Determinar"
+                            };
+                            torneo.partidos.push(partido)
+                        }
+                        await torneoRepo.update(torneo).then((id) => {
+                            // TODO
+                            if(id){
 
-                            await torneoRepo.update(torneo).then((id) => {
-                            });
+                            } else {
 
-
-
-                            var auxTorneos = [];
-                            while(true){
-                                if (auxTorneos.length == 0){
-                                    let half = Math.floor(torneo.partidos.length / 2) +1;
-                                    partidos.push(torneo.partidos.slice(0, half));
-                                    auxTorneos = torneo.partidos.slice(half, torneo.partidos.length);
-                                } else {
-                                    let half = Math.floor(auxTorneos.length / 2) +1;
-                                    partidos.push(auxTorneos.slice(0, half));
-                                    auxTorneos = auxTorneos.slice(half, auxTorneos.length);
-                                }
-                                if (auxTorneos.length == 1){
-                                    partidos.push(auxTorneos);
-                                    break;
-                                }
+                            }
+                        });
+                        let auxTorneos = [];
+                        while(true){
+                            if (auxTorneos.length == 0){
+                                let half = Math.floor(torneo.partidos.length / 2) +1;
+                                partidos.push(torneo.partidos.slice(0, half));
+                                auxTorneos = torneo.partidos.slice(half, torneo.partidos.length);
+                            } else {
+                                let half = Math.floor(auxTorneos.length / 2) +1;
+                                partidos.push(auxTorneos.slice(0, half));
+                                auxTorneos = auxTorneos.slice(half, auxTorneos.length);
+                            }
+                            if (auxTorneos.length == 1){
+                                partidos.push(auxTorneos);
+                                break;
                             }
                         }
-
                     } else {
                         auxTorneos = [];
                         while(true){
@@ -258,7 +254,6 @@ module.exports = {
                             }
                         }
                     }
-
                     return h.view('torneos/ver',
                         {
                             torneo: torneo,
@@ -270,242 +265,101 @@ module.exports = {
             },
             {
                 method: 'GET',
-                path: '/anuncio/{id}/eliminar',
-                handler: async (req, h) => {
-
-                    var criterio = { "_id" :
-                            require("mongodb").ObjectID(req.params.id) };
-
-                    await repositorio.conexion()
-                        .then((db) => repositorio.eliminarAnuncios(db, criterio))
-                        .then((resultado) => {
-                            console.log("Eliminado")
-                        })
-
-                    return h.redirect('/misanuncios?mensaje="Anuncio Eliminado"')
-                }
-            },
-            {
-                method: 'POST',
-                path: '/anuncio/{id}/modificar',
-                options : {
-                    auth: 'auth-registrado',
-                    payload: {
-                        output: 'stream'
-                    }
-                },
-                handler: async (req, h) => {
-
-                    // criterio de anucio a modificar
-                    var criterio = {
-                        "_id" : require("mongodb").ObjectID(req.params.id),
-                        "usuario": req.auth.credentials
-                    }
-
-                    // nuevos valores para los atributos
-                    anuncio = {
-                        usuario: req.auth.credentials ,
-                        titulo: req.payload.titulo,
-                        descripcion: req.payload.descripcion,
-                        categoria: req.payload.categoria,
-                        precio: Number.parseFloat(req.payload.precio),
-                    }
-
-                    // await no continuar hasta acabar esto
-                    // Da valor a respuesta
-                    await repositorio.conexion()
-                        .then((db) => repositorio.modificarAnuncio(db,criterio,anuncio))
-                        .then((id) => {
-                            respuesta = "";
-                            if (id == null) {
-                                respuesta =  h.redirect('/misanuncios?mensaje="Error al modificar"')
-                            } else {
-                                respuesta = h.redirect('/misanuncios?mensaje="Anuncio modificado"')
-                            }
-                        })
-
-                    // ¿nos han enviado foto nueva?
-                    if ( req.payload.foto.filename != "") {
-                        binario = req.payload.foto._data;
-                        extension = req.payload.foto.hapi.filename.split('.')[1];
-
-                        await module.exports.utilSubirFichero(
-                            binario, req.params.id, extension);
-                    }
-
-                    return respuesta;
-                }
-            },
-            {
-                method: 'GET',
-                path: '/anuncio/{id}/modificar',
-                options: {
-                    auth: 'auth-registrado'
-                },
-                handler: async (req, h) => {
-
-                    var criterio = {
-                        "_id" : require("mongodb").ObjectID(req.params.id),
-                        "usuario": req.auth.credentials
-                    }
-                    await repositorio.conexion()
-                        .then((db) => repositorio.obtenerAnuncios(db, criterio))
-                        .then((anuncios) => {
-                            // ¿Solo una coincidencia por _id?
-                            anuncio = anuncios[0];
-                        })
-
-                    return h.view('modificar',
-                        { anuncio: anuncio},
-                        { layout: 'base'} );
-                }
-            },
-            {
-                method: 'POST',
-                path: '/publicar',
-                options : {
-                    auth: 'auth-registrado',
-                    payload: {
-                        output: 'stream'
-                    }
-                },
-                handler: async (req, h) => {
-
-                    anuncio = {
-                        usuario: req.auth.credentials ,
-                        titulo: req.payload.titulo,
-                        descripcion: req.payload.descripcion,
-                        categoria: req.payload.categoria,
-                        precio: Number.parseFloat(req.payload.precio),
-
-                    }
-
-                    // await no continuar hasta acabar esto
-                    // Da valor a respuesta
-
-                    await repositorio.conexion()
-                        .then((db) => repositorio.insertarAnuncio(db, anuncio))
-                        .then((id) => {
-                            respuesta = "";
-                            if (id == null) {
-                                respuesta =   h.redirect('/misanuncios?mensaje="Error al insertar"')
-                            } else {
-                                respuesta = h.redirect('/misanuncios?mensaje="Anuncio Insertado"')
-                                idAnuncio = id;
-                            }
-                        })
-
-                    binario = req.payload.foto._data;
-                    extension = req.payload.foto.hapi.filename.split('.')[1];
-
-                    await module.exports.utilSubirFichero(
-                        binario, idAnuncio, extension);
-
-                    return respuesta;
-                }
-            },
-            {
-                method: 'GET',
-                path: '/publicar',
-                options: {
-                    auth: 'auth-registrado'
-                },
-                handler: async (req, h) => {
-                    return h.view('publicar',
-                        { usuario: 'jordán'},
-                        { layout: 'base'});
-                }
-            },
-            {
-                method: 'GET',
                 path: '/base',
                 handler: {
                     view: 'layout/base'
                 }
             },
+            /* REGISTRO DEL USUARIO */
             {
                 method: 'GET',
                 path: '/registro',
                 handler: async (req, h) => {
+                    // Obtener vista
                     return h.view('registro',
                         { },
                         { layout: 'base'});
                 }
             },
+            /* LOGIN DEL USUARIO */
             {
                 method: 'GET',
                 path: '/login',
                 handler: async (req, h) => {
+                    // Obtener vista
                     return h.view('login',
                         { },
                         { layout: 'base'});
                 }
             },
+            /* CERRAR SESIÓN DEL USUARIO */
             {
                 method: 'GET',
                 path: '/desconectarse',
                 handler: async (req, h) => {
+                    // Quitamos la cookie de la sesión
                     req.cookieAuth.set({ usuario: "", secreto: "" });
+                    // Obtenemos la vista
                     return h.view('login',
                         { },
                         { layout: 'base'});
                 }
             },
+            /* LOGIN DEL USUARIO */
             {
                 method: 'POST',
                 path: '/login',
                 handler: async (req, h) => {
-                    password = require('crypto').createHmac('sha256', 'secreto')
+                    // Transformamos la contraseña del usuario
+                    let password = require('crypto').createHmac('sha256', 'secreto')
                         .update(req.payload.password).digest('hex');
-
-                    usuarioBuscar = {
+                    // Criterio de búsqueda
+                    let criteria = {
                         usuario: req.payload.usuario,
                         password: password,
-                    }
-
-                    // await no continuar hasta acabar esto
-                    // Da valor a respuesta
-
-                    await equipoRepo.search(usuarioBuscar).then((usuarios) => {
+                    };
+                    // Obtenemos el usuario
+                    let respuesta = null;
+                    await equipoRepo.search(criteria).then((usuarios) => {
                         respuesta = "";
-                        if (usuarios == null || usuarios.length == 0 ) {
-                            respuesta =  h.redirect('/login?mensaje=Usuario o password incorrecto&tipoMensaje=danger')
+                        if (usuarios === null || usuarios.length === 0 ) {
+                            respuesta =  h.redirect('/login?mensaje=Usuario o password incorrecto&tipoMensaje=danger');
                         } else {
                             req.cookieAuth.set({
                                 usuario: usuarios[0].usuario,
                                 secreto : "secreto"
                             });
-                            respuesta = h.redirect('/')
+                            respuesta = h.redirect('/');
 
                         }
-                    })
+                    });
                     return respuesta;
                 }
             },
+            /* REGISTRO DEL USUARIO */
             {
                 method: 'POST',
                 path: '/registro',
                 handler: async (req, h) => {
-                    let respuesta;
-
                     // Comprobar que ambas contraseñas son iguales
                     if (req.payload.password !== req.payload.repassword)
                         return h.redirect('/registro?mensaje="Passwords distintas"'); // Contraseña no salta, debe ser por la 'ñ'
-
+                    // Transformamos la contraseña del usuario
                     let password = require('crypto').createHmac('sha256', 'secreto')
                         .update(req.payload.password).digest('hex');
-
+                    // Usuario
                     let usuario = {
                         usuario: req.payload.usuario,
                         nombre: req.payload.nombre,
                         color: req.payload.color,
                         password: password
-                    }
-
+                    };
+                    // Buscamos al usuario para comprobar si ya existe
                     await equipoRepo.search({'usuario': usuario.usuario}).then( async (result) => {
                        if (result.length !== 0) {
                            respuesta =  h.redirect('/registro?mensaje="Usuario no disponible"');
                        } else {
+                           // Guardamos al usuario en la bd
                            await equipoRepo.save(usuario).then((id) => {
                                respuesta = "";
                                if (id == null) {
@@ -516,7 +370,6 @@ module.exports = {
                            });
                        }
                     });
-
                     return respuesta;
                 }
             },
@@ -606,13 +459,15 @@ module.exports = {
                     let empieza = new Date(req.payload.fecha);
                     empieza.setDate(empieza.getDate() - 10);
 
-                    torneo.nombre(req.payload.nombre);
-                    torneo.numEquipos(req.payload.nEquipos);
-                    torneo.categoria(req.payload.categoria);
-                    torneo.finInscripcion(fin);
-                    torneo.visibilidad(req.payload.visibilidad);
-                    torneo.inicioInscripcion(empieza);
-                    torneo.creador(req.state['session-id'].usuario);
+                    torneo.nombre = req.payload.nombre;
+                    torneo.numEquipos = req.payload.nEquipos;
+                    torneo.categoria = req.payload.categoria;
+                    torneo.finInscripcion = fin;
+                    torneo.visibilidad = req.payload.visibilidad;
+                    torneo.inicioInscripcion = empieza;
+                    torneo.equipos = [];
+                    torneo.partidos = [];
+                    torneo.creador = req.state['session-id'].usuario;
 
                     // Guardar el torneo en la bd
                     let respuesta = null;
@@ -706,7 +561,7 @@ module.exports = {
                          e.finInscripcion= module.exports.getFechaBonita(e.finInscripcion);
                          e.categoria = require('./models/Categoria').categorias[e.categoria];
                          e.disponible = true;
-                         if(module.exports.getFechaBonita(new Date()) > e.finInscripcion){
+                         if (module.exports.getFechaBonita(new Date()) > e.finInscripcion){
                             e.disponible = false;
                          }
                          if(module.exports.getUsuarioIdentificado(req) != null){
