@@ -99,7 +99,7 @@ module.exports = {
                 handler: async (req, h) => {
                     // Obtener todos los torneos
                     let totalTorneos = await torneoRepo.search({}).then((torneos) => {
-                             return torneos;
+                         return torneos;
                     });
                     // Transformar a objetos de nuestro modelo
                     totalTorneos = module.exports.getTorneos(totalTorneos);
@@ -122,6 +122,7 @@ module.exports = {
                         { layout: 'base'} );
                 }
             },
+            /* UNIRSE A UN TORNEO */
             {
                 method: 'GET',
                 path: '/torneos/{id}/unirse',
@@ -130,42 +131,35 @@ module.exports = {
                     auth: 'auth-registrado'
                 },
                 handler: async (req, h) => {
-
-                   
-
-                    var criterio = {"_id": require("mongodb").ObjectID(req.params.id)};
-                    
-        
-                    await torneoRepo.search(criterio)
-                        .then((torneos) => {
-                            torneo = torneos[0];
+                    // Criterio de búsqueda
+                    let criteria = {"_id": require("mongodb").ObjectID(req.params.id)};
+                    // Buscar el torneo
+                    let torneo = await torneoRepo.search(criteria).then((torneos) => {
+                        return torneos[0];
                     });
-                    
-                    torneo.equipos.forEach(equipo_nombre => {
-                        if(equipo_nombre == req.auth.credentials)
-                        {
-                            respuesta = '/torneos?mensaje=Ya se ha unido al torneo&tipoMensaje=danger';
-                        }
+                    // Transformar a objetos de nuestro modelo
+                    torneo = module.exports.getTorneo(torneo);
+                    // Comprobar si ya se está inscrito
+                    torneo.equipos.forEach(equipo => {
+                        if (equipo === req.state["session-id"].usuario)
+                            return h.redirect('/torneos?mensaje=Ya se ha unido al torneo&tipoMensaje=danger');
+
                     });
-                    if(module.exports.getFechaBonita(new Date()) < torneo.finInscripcion)
-                        torneo.equipos.push(req.auth.credentials);
+                    // Comprobar si aun pueden inscribirse
+                    let ahora = new Date();
+                    if (ahora < torneo.finInscripcion)
+                        torneo.equipos.push(req.state["session-id"].usuario);
                     else
-                        respuesta = '/torneos?mensaje=Ya no permite inscripciones el torneo&tipoMensaje=danger';
-
-                    await torneoRepo.update(torneo) .then((result) => {
+                        return h.redirect('/torneos?mensaje=Ya no permite inscripciones el torneo&tipoMensaje=danger');
+                    // Actualizar bd
+                    let resultado = null;
+                    await torneoRepo.update(torneo).then((result) => {
                         if(result)
-                            respuesta ='/torneos?mensaje=Se ha unido al torneo&tipoMensaje=success';
+                            resultado = h.redirect('/torneos?mensaje=Se ha unido al torneo&tipoMensaje=success');
                         else
-                        {
-                           respuesta = '/torneos?mensaje=No se ha podido unirse&tipoMensaje=danger';                      
-                        }
-
-                });;
-
-                return h.redirect(respuesta);
-                    
-
-                    
+                            resultado = h.redirect('/torneos?mensaje=No se ha podido unirse&tipoMensaje=danger');
+                    });
+                    return resultado;
                 }
             },
             {
@@ -715,7 +709,7 @@ module.exports = {
                          e.finInscripcion= module.exports.getFechaBonita(e.finInscripcion);
                          e.categoria = require('./models/Categoria').categorias[e.categoria];
                          e.disponible = true;
-                         if(module.exports.getFechaBonita(new Date()) > e.finInscripcion){
+                         if (module.exports.getFechaBonita(new Date()) > e.finInscripcion){
                             e.disponible = false;
                          }
                          if(module.exports.getUsuarioIdentificado(req) != null){
