@@ -526,8 +526,10 @@ module.exports = {
                 },
                 handler: async (req, h) => {
                     // Posible número de equipos
-
-                    let numEquipos = [2, 4, 8, 16, 32];
+                    let numEquipos = [];
+                    for (let i = 2; i <= process.env.MAX_TEAMS; i=i*process.env.MULTIPLE_TEAMS) {
+                        numEquipos.push(i);
+                    }
                     // Categorías disponibles
                     let categoria = categorias.categorias;
                     // Obtenemos la vista
