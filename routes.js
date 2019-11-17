@@ -194,7 +194,9 @@ module.exports = {
                                 }
                                 let columna = torneo.partidos.length;
                                 while (columna > 1) {
-                                    for (let i = 0; i < columna; i += 2) {
+                                    let  elementosColumna = columna;
+                                    columna = 0;
+                                    for (let i = 0; i < elementosColumna; i+=2) {
                                         let resultado = {
                                             golesEquipoLocal : 0,
                                             golesEquipoVisitante : 0
@@ -204,7 +206,7 @@ module.exports = {
                                             equipoVisitante: "Por Determinar",
                                             resultado : resultado
                                         };
-                                        columna = 0;
+
                                         columna++;
                                         torneo.partidos.push(partido)
                                     }
