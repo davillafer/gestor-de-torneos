@@ -47,15 +47,6 @@ module.exports =  class TorneoFutbol {
             this._visibilidad = visibilidad;
         else
             this._visibilidad = null;
-        this._nombre = nombre;
-        this._numEquipos = numEquipos;
-        this._finInscripcion = finInscripcion;
-        this._inicioInscripcion = inicioInscripcion;
-        this._partidos = partidos;
-        this._equipos = equipos;
-        this._creador = creador;
-        this._categoria = categoria;
-        this._visibilidad = visibilidad;
     }
 
     get nombre() {

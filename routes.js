@@ -58,7 +58,10 @@ module.exports = {
         return aux;
     },
     getTorneo(t) {
-        return new TorneoFutbol(t._nombre, t._numEquipos, t._finInscripcion, t._inicioInscripcion, t._partidos, t._equipos, t._creador, t._categoria, t._visibilidad);
+        let aux = new TorneoFutbol(t._nombre, t._numEquipos, t._finInscripcion, t._inicioInscripcion, t._partidos, t._equipos, t._creador, t._categoria, t._visibilidad);
+        if (t._id)
+            aux._id = t._id;
+        return aux;
     },
     register: async (server, options) => {
         miserver = server;        
@@ -143,7 +146,6 @@ module.exports = {
                     torneo.equipos.forEach(equipo => {
                         if (equipo === req.state["session-id"].usuario)
                             return h.redirect('/torneos?mensaje=Ya se ha unido al torneo&tipoMensaje=danger');
-
                     });
                     // Comprobar si aun pueden inscribirse
                     let ahora = new Date();
