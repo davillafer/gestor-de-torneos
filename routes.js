@@ -166,60 +166,77 @@ module.exports = {
                     // Partidos del torneo
                     let partidos = [];
                     if (torneo.partidos.length === 0){
-                        let equipos = torneo.equipos;
-                        let equiposLength = equipos.length;
-                        let equipoAnterior = undefined;
-                        for (let i = 0; i < equiposLength; i++){
-                            let number = Math.floor(Math.random() * equipos.length);
-                            if (equipoAnterior === undefined){
-                                equipoAnterior = equipos[number];
-                                equipos.splice(number, 1);
-                            } else {
-                                let partido = {
-                                    equipoLocal : equipoAnterior,
-                                    equipoVisitante : equipos[number]
-                                };
-                                equipoAnterior = undefined;
-                                equipos.splice(number, 1);
-                                torneo.partidos.push(partido)
-                            }
-                        }
-                        let columna = torneo.partidos.length;
-                        while(columna > 1) {
-                            for (let i = 0; i < columna; i += 2) {
-                                let partido = {
-                                    equipoLocal: "Por Determinar",
-                                    equipoVisitante: "Por Determinar"
-                                };
-                                columna = 0;
-                                columna++;
-                                torneo.partidos.push(partido)
-                            }
-                        }
-                        await torneoRepo.update(torneo).then((id) => {
-                            if(id){
-
-                            } else {
-
-                            }
-                        });
-                        let auxTorneos = [];
-                        if (torneo.partidos.length == 1){
-                            partidos.push(torneo.partidos);
-                        } else {
-                            while(true){
-                                if (auxTorneos.length == 0){
-                                    let half = Math.floor(torneo.partidos.length / 2) +1;
-                                    partidos.push(torneo.partidos.slice(0, half));
-                                    auxTorneos = torneo.partidos.slice(half, torneo.partidos.length);
-                                } else {
-                                    let half = Math.floor(auxTorneos.length / 2) +1;
-                                    partidos.push(auxTorneos.slice(0, half));
-                                    auxTorneos = auxTorneos.slice(half, auxTorneos.length);
+                        fechaDeInicioSuperada = true;
+                        if (fechaDeInicioSuperada) {
+                            if (torneo.equipos.length != 0){
+                                let equipos = torneo.equipos.slice();
+                                let equiposLength = equipos.length;
+                                let equipoAnterior = undefined;
+                                for (let i = 0; i < equiposLength; i++) {
+                                    let number = Math.floor(Math.random() * equipos.length);
+                                    if (equipoAnterior === undefined) {
+                                        equipoAnterior = equipos[number];
+                                        equipos.splice(number, 1);
+                                    } else {
+                                        let resultado = {
+                                            golesEquipoLocal : 0,
+                                            golesEquipoVisitante : 0
+                                        };
+                                        let partido = {
+                                            equipoLocal: equipoAnterior,
+                                            equipoVisitante: equipos[number],
+                                            resultado : resultado
+                                        };
+                                        equipoAnterior = undefined;
+                                        equipos.splice(number, 1);
+                                        torneo.partidos.push(partido)
+                                    }
                                 }
-                                if (auxTorneos.length == 1){
-                                    partidos.push(auxTorneos);
-                                    break;
+                                let columna = torneo.partidos.length;
+                                while (columna > 1) {
+                                    for (let i = 0; i < columna; i += 2) {
+                                        let resultado = {
+                                            golesEquipoLocal : 0,
+                                            golesEquipoVisitante : 0
+                                        };
+                                        let partido = {
+                                            equipoLocal: "Por Determinar",
+                                            equipoVisitante: "Por Determinar",
+                                            resultado : resultado
+                                        };
+                                        columna = 0;
+                                        columna++;
+                                        torneo.partidos.push(partido)
+                                    }
+                                }
+
+                                await torneoRepo.update(torneo).then((id) => {
+                                    if(id){
+
+                                    } else {
+
+                                    }
+                                });
+
+                                let auxTorneos = [];
+                                if (torneo.partidos.length == 1) {
+                                    partidos.push(torneo.partidos);
+                                } else {
+                                    while (true) {
+                                        if (auxTorneos.length == 0) {
+                                            let half = Math.floor(torneo.partidos.length / 2) + 1;
+                                            partidos.push(torneo.partidos.slice(0, half));
+                                            auxTorneos = torneo.partidos.slice(half, torneo.partidos.length);
+                                        } else {
+                                            let half = Math.floor(auxTorneos.length / 2) + 1;
+                                            partidos.push(auxTorneos.slice(0, half));
+                                            auxTorneos = auxTorneos.slice(half, auxTorneos.length);
+                                        }
+                                        if (auxTorneos.length == 1) {
+                                            partidos.push(auxTorneos);
+                                            break;
+                                        }
+                                    }
                                 }
                             }
                         }

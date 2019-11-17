@@ -24,7 +24,7 @@
 {{else}}
 <section class="uk-section bracket">
     <div class="uk-container">
-        <h1 class = "uk-heading-medium">{{torneo.nombre}}</h1>
+        <h1 class = "uk-heading-medium uk-align-center">{{torneo.nombre}}</h1>
         <div class = "uk-overflow-auto">
             <div class="container">
                 <div class="tournament-bracket tournament-bracket--rounded">
@@ -45,14 +45,14 @@
                                         </tr>
                                         </thead>
                                         <tbody class="tournament-bracket__content">
-                                        <tr class="tournament-bracket__team tournament-bracket__team--winner">
+                                        <tr class="tournament-bracket__team">
                                             <td class="tournament-bracket__country">
                                                 <abbr class="tournament-bracket__code">{{this.equipoLocal}}</abbr>
                                                 <span class="tournament-bracket__flag flag-icon flag-icon-ca"
                                                       aria-label="Flag"></span>
                                             </td>
                                             <td class="tournament-bracket__score">
-                                                <span class="tournament-bracket__number">0</span>
+                                                <span class="tournament-bracket__number">{{this.resultado.golesEquipoLocal}}</span>
                                             </td>
                                         </tr>
                                         <tr class="tournament-bracket__team">
@@ -62,7 +62,7 @@
                                                       aria-label="Flag"></span>
                                             </td>
                                             <td class="tournament-bracket__score">
-                                                <span class="tournament-bracket__number">0</span>
+                                                <span class="tournament-bracket__number">{{this.resultado.golesEquipoVisitante}}</span>
                                             </td>
                                         </tr>
                                         </tbody>
