@@ -9,7 +9,8 @@
     "handlebars": "^4.5.2",
     "mongodb": "^2.2.33",
     "mustache": "^3.1.0",
-    "promise": "^8.0.3"
+    "promise": "^8.0.3",
+    "properties-reader": "^0.3.1"
   },
   "scripts": {
     "start": "node main.js"
