@@ -1,4 +1,5 @@
 const categorias = require('./models/Categoria');
+const ObjectID = require("mongodb").ObjectID;
 const FutbolFactory = require('./factory/FutbolFactory');
 const futbolFactory = new FutbolFactory();
 
@@ -54,11 +55,8 @@ module.exports = {
         equipoRepo = server.methods.getEquipoRepo();
         torneoRepo = server.methods.getTorneoRepo();
 
-
-
-
-
         server.route([
+            /* ELIMINAR TORNEOS */
             {
                 method: 'GET',
                 path: '/torneos/{id}/eliminar',
@@ -66,16 +64,19 @@ module.exports = {
                     auth: 'auth-registrado'
                 },
                 handler: async (req, h) => {
-
-                    var criterio = { "_id" :
-                            require("mongodb").ObjectID(req.params.id) };
-
-                    await torneoRepo.delete(criterio)
-                        .then((resultado) => {
-                            console.log("Eliminado")
-                        })
-
-                        return h.redirect('/torneos/creados?mensaje=Torneo Eliminado')
+                    // Criterio de búsqueda
+                    let id = ObjectID(req.params.id);
+                    let criteria = { "_id" :  id};
+                    // Eliminar el torneo
+                    let result = null;
+                    await torneoRepo.delete(criteria).then((res) => {
+                        if (res) {
+                            result = h.redirect('/torneos/creados?mensaje=Torneo Eliminado');
+                        } else {
+                            result = h.redirect('/torneos/creados?mensaje=Error al eliminar');
+                        }
+                    });
+                    return result;
                 }
             },
             {
