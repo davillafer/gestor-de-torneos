@@ -50,9 +50,9 @@ module.exports = {
             return `${fecha.getDate()}/${fecha.getMonth()+1}/${fecha.getFullYear()}`;
         }
     },
-    getTorneos(lista) {
+    getTorneos(list) {
         let aux = [];
-        lista.forEach(t => {
+        list.forEach(t => {
            aux.push(module.exports.getTorneo(t));
         });
         return aux;
@@ -152,95 +152,87 @@ module.exports = {
                     else
                         return h.redirect('/torneos?mensaje=Ya no permite inscripciones el torneo&tipoMensaje=danger');
                     // Actualizar bd
-                    let resultado = null;
+                    let result = null;
                     await torneoRepo.update(torneo).then((result) => {
                         if(result)
-                            resultado = h.redirect('/torneos?mensaje=Se ha unido al torneo&tipoMensaje=success');
+                            result = h.redirect('/torneos?mensaje=Se ha unido al torneo&tipoMensaje=success');
                         else
-                            resultado = h.redirect('/torneos?mensaje=No se ha podido unirse&tipoMensaje=danger');
+                            result = h.redirect('/torneos?mensaje=No se ha podido unirse&tipoMensaje=danger');
                     });
-                    return resultado;
+                    return result;
                 }
             },
+            /* VER UN TORNEO */
             {
                 method: 'GET',
                 path:
                     '/torneos/{id}/ver',
                 options:
-                    {
-                        auth: 'auth-registrado'
-                    },
+                {
+                    auth: 'auth-registrado'
+                },
                 handler: async (req, h) => {
-
-
-                    var criterio = {"_id": require("mongodb").ObjectID(req.params.id)};
-                    var torneo;
-
-                    ///HAZLO CON TORNEOREPO.SEARCH
-                    // await TorneoRepo.search(criterio)
-                    //     .then((torneos) => {
-                    //         torneo = torneos[0];
-                    //     });
-
-
-                    await torneoRepo.search(criterio)
-                        .then((torneos) => {
-                            torneo = torneos[0];
-                        });
-
-                    var partidos = [];
-                    if (torneo.partidos.length == 0){
-                        if (true){
-                            var equipos = torneo.equipos;
-                            var equiposLenght = equipos.length;
-                            var equipoAnterior = undefined;
-                            for(var i = 0; i < equiposLenght; i++){
-                                var number = Math.floor(Math.random() * (equipos.length - 0)) + 0;
-                                if (equipoAnterior == undefined){
-                                    equipoAnterior = equipos[number];
-                                    equipos.splice(number, 1);
-                                } else {
-                                    var partido = {
-                                        equipoLocal : equipoAnterior,
-                                        equipoVisitante : equipos[number]
-                                    };
-                                    equipoAnterior = undefined;
-                                    equipos.splice(number, 1);
-                                    torneo.partidos.push(partido)
-                                }
-                            }
-                            var nPartidos = torneo.partidos.length;
-                            for(var i = 0; i < nPartidos; i += 2){
-                                var partido = {
-                                    equipoLocal : "Por Determinar",
-                                    equipoVisitante : "Por Determinar"
+                    // Criterio de búsqueda
+                    let criteria = {"_id": require("mongodb").ObjectID(req.params.id)};
+                    // Obtener el torneo
+                    let torneo = await torneoRepo.search(criteria).then((torneos) => {
+                            return torneos[0];
+                    });
+                    // Transformar a objetos de nuestro modelo
+                    torneo = module.exports.getTorneo(torneo);
+                    // Partidos del torneo
+                    let partidos = [];
+                    if (torneo.partidos.length === 0){
+                        let equipos = torneo.equipos;
+                        let equiposLength = equipos.length;
+                        let equipoAnterior = undefined;
+                        for (let i = 0; i < equipos.length; i++){
+                            let number = Math.floor(Math.random() * equiposLength);
+                            if (equipoAnterior === undefined){
+                                equipoAnterior = equipos[number];
+                                equipos.splice(number, 1);
+                            } else {
+                                let partido = {
+                                    equipoLocal : equipoAnterior,
+                                    equipoVisitante : equipos[number]
                                 };
+                                equipoAnterior = undefined;
+                                equipos.splice(number, 1);
                                 torneo.partidos.push(partido)
                             }
+                        }
+                        let nPartidos = torneo.partidos.length;
+                        for(let i = 0; i < nPartidos; i += 2){
+                            let partido = {
+                                equipoLocal : "Por Determinar",
+                                equipoVisitante : "Por Determinar"
+                            };
+                            torneo.partidos.push(partido)
+                        }
+                        await torneoRepo.update(torneo).then((id) => {
+                            // TODO
+                            if(id){
 
-                            await torneoRepo.update(torneo).then((id) => {
-                            });
+                            } else {
 
-
-
-                            var auxTorneos = [];
-                            while(true){
-                                if (auxTorneos.length == 0){
-                                    let half = Math.floor(torneo.partidos.length / 2) +1;
-                                    partidos.push(torneo.partidos.slice(0, half));
-                                    auxTorneos = torneo.partidos.slice(half, torneo.partidos.length);
-                                } else {
-                                    let half = Math.floor(auxTorneos.length / 2) +1;
-                                    partidos.push(auxTorneos.slice(0, half));
-                                    auxTorneos = auxTorneos.slice(half, auxTorneos.length);
-                                }
-                                if (auxTorneos.length == 1){
-                                    partidos.push(auxTorneos);
-                                    break;
-                                }
+                            }
+                        });
+                        let auxTorneos = [];
+                        while(true){
+                            if (auxTorneos.length == 0){
+                                let half = Math.floor(torneo.partidos.length / 2) +1;
+                                partidos.push(torneo.partidos.slice(0, half));
+                                auxTorneos = torneo.partidos.slice(half, torneo.partidos.length);
+                            } else {
+                                let half = Math.floor(auxTorneos.length / 2) +1;
+                                partidos.push(auxTorneos.slice(0, half));
+                                auxTorneos = auxTorneos.slice(half, auxTorneos.length);
+                            }
+                            if (auxTorneos.length == 1){
+                                partidos.push(auxTorneos);
+                                break;
                             }
                         }
-
                     } else {
                         auxTorneos = [];
                         while(true){
@@ -259,7 +251,6 @@ module.exports = {
                             }
                         }
                     }
-
                     return h.view('torneos/ver',
                         {
                             torneo: torneo,
