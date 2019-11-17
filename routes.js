@@ -3,6 +3,8 @@ const ObjectID = require("mongodb").ObjectID;
 const FutbolFactory = require('./factory/FutbolFactory');
 const futbolFactory = new FutbolFactory();
 const TorneoFutbol = require('./models/TorneoFutbol');
+const dotenv = require('dotenv');
+dotenv.config();
 
 module.exports = {
     name: 'MiRouter',
@@ -427,9 +429,12 @@ module.exports = {
                 method: 'POST',
                 path: '/registro',
                 handler: async (req, h) => {
+                    // Comprobar que la contraseña es mayor de X caracteres
+                    if (req.payload.password.length < process.env.NUM_CHAR)
+                        return h.redirect('/registro?mensaje="Passwords demasiado corta&tipoMensaje=danger"');
                     // Comprobar que ambas contraseñas son iguales
                     if (req.payload.password !== req.payload.repassword)
-                        return h.redirect('/registro?mensaje="Passwords distintas"'); // Contraseña no salta, debe ser por la 'ñ'
+                        return h.redirect('/registro?mensaje="Passwords distintas&tipoMensaje=danger"'); // Contraseña no salta, debe ser por la 'ñ'
                     // Transformamos la contraseña del usuario
                     let password = require('crypto').createHmac('sha256', 'secreto')
                         .update(req.payload.password).digest('hex');
@@ -521,6 +526,7 @@ module.exports = {
                 },
                 handler: async (req, h) => {
                     // Posible número de equipos
+
                     let numEquipos = [2, 4, 8, 16, 32];
                     // Categorías disponibles
                     let categoria = categorias.categorias;
@@ -543,6 +549,20 @@ module.exports = {
                     auth: 'auth-registrado'
                 },
                 handler: async (req, h) => {
+                    // Comprobamos que el usuario no tiene 2 torneos ya creados
+                    let torneos = await torneoRepo.search({}).then((torneos) => {
+                        return torneos;
+                    });
+                    // Transformar a objetos de nuestro modelo
+                    torneos = module.exports.getTorneos(torneos);
+                    let contador = 0;
+                    torneos.forEach(t => {
+                        if (t.creador === module.exports.getUsuarioIdentificado(req)){
+                            contador++;
+                        }
+                    });
+                    if (contador >= 2)
+                        return h.redirect('/torneos/crear?mensaje=Ya dispones de 2 torneos&tipoMensaje=danger\'');
                     // Creamos el torneo
                     let torneo = futbolFactory.crearTorneo();
                     // Obtener valores del usuarios
