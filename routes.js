@@ -373,6 +373,7 @@ module.exports = {
                     return respuesta;
                 }
             },
+            /* VER PERfil DEL USUARIO */
             {
                 method: 'GET',
                 path: '/perfil',
@@ -381,16 +382,15 @@ module.exports = {
                 },
                 handler: async (req, h) => {
                     // Obtenemos la información del usuario
-                    let user = await equipoRepo.search({ 'usuario': req.state['session-id'].usuario })
-                        .then( async result => {
-                            if (result) {
-                                return result[0];
-                            } else {
-                                return null;
-                            }
+                    let user = await equipoRepo.search({ 'usuario': req.state['session-id'].usuario }).then( async result => {
+                        if (result) {
+                            return result[0];
+                        } else {
+                            return null;
+                        }
                     });
                     // Comprobamos si hay error
-                    if ( user ) {
+                    if (user) {
                         return h.view('usuario/perfil',
                             {
                                 user,
@@ -402,18 +402,19 @@ module.exports = {
                     }
                 }
             },
+            /* MODIFICAR PERFIL */
             {
                 method: 'POST',
                 path: '/perfil',
                 handler: async (req, h) => {
-                    let respuesta;
-
                     let usuario = {
                         usuario: req.payload.usuario,
                         nombre: req.payload.nombre,
                         color: req.payload.color
-                    }
+                    };
 
+                    // Modificamos el usuario
+                    let respuesta = null;
                     await equipoRepo.update(usuario).then((id) => {
                         if (id == null) {
                             respuesta =  h.redirect('/perfil?mensaje="Error al modificar"')
@@ -425,6 +426,7 @@ module.exports = {
                     return respuesta;
                 }
             },
+            /* CREAR TORNEOS */
             {
                 method: 'GET',
                 path: '/torneos/crear',
@@ -432,18 +434,22 @@ module.exports = {
                     auth: 'auth-registrado'
                 },
                 handler: async (req, h) => {
+                    // Posible número de equipos
                     let numEquipos = [2, 4, 8, 16, 32];
+                    // Categorías disponibles
                     let categoria = categorias.categorias;
+                    // Obtenemos la vista
                     return h.view('torneos/crear',
                         {
                             categoria,
                             numEquipos,
-                            usuarioAutenticado: req.auth.credentials,
+                            usuarioAutenticado: req.state['session-id'].usuario,
                         },
                         { layout: 'base'}
                     );
                 }
             },
+            /* CREAR TORNEO */
             {
                 method: 'POST',
                 path: '/torneos/crear',
@@ -453,12 +459,10 @@ module.exports = {
                 handler: async (req, h) => {
                     // Creamos el torneo
                     let torneo = futbolFactory.crearTorneo();
-
                     // Obtener valores del usuarios
                     let fin = new Date(req.payload.fecha);
                     let empieza = new Date(req.payload.fecha);
                     empieza.setDate(empieza.getDate() - 10);
-
                     torneo.nombre = req.payload.nombre;
                     torneo.numEquipos = req.payload.nEquipos;
                     torneo.categoria = req.payload.categoria;
@@ -468,8 +472,7 @@ module.exports = {
                     torneo.equipos = [];
                     torneo.partidos = [];
                     torneo.creador = req.state['session-id'].usuario;
-
-                    // Guardar el torneo en la bd
+                    // Guardamos el torneo en la bd
                     let respuesta = null;
                     await torneoRepo.save(torneo).then((id) => {
                         respuesta = "";
@@ -479,11 +482,10 @@ module.exports = {
                             respuesta = h.redirect('/?mensaje=Torneo creado');
                         }
                     });
-
-                    // Mostrar la vista
                     return respuesta;
                 }
             },
+            /* VER TORNEOS CREADOS*/
             {
                 method: 'GET',
                 path: '/torneos/creados',
@@ -491,48 +493,46 @@ module.exports = {
                     auth: 'auth-registrado'
                 },
                 handler: async (req, h) => {
-
-                    var pg = parseInt(req.query.pg); 
-                    if ( req.query.pg == null){ // Puede no venir el param
+                    // Paginación
+                    let pg = parseInt(req.query.pg);
+                    let pgUltima = 0;
+                    // Puede no venir el param
+                    if ( req.query.pg === null){
                         pg = 1;
                     }
-
-                    var criterio = { "creador" : req.auth.credentials };
-                    // cookieAuth
-
-                    await torneoRepo.searchPg(pg, criterio)
-                        .then((torneos, total) => {
-                             totalTorneos = torneos;
-                            pgUltima = totalTorneos.total/2;
-
-                            // La págian 2.5 no existe
-                            // Si excede sumar 1 y quitar los decimales
-                            if (pgUltima % 2 > 0 ){
-                                pgUltima = Math.trunc(pgUltima);
-                                pgUltima = pgUltima+1;
-                            }
-                        })
-
-                    totalTorneos.forEach(torneo => {
+                    // Criterio de búsqueda
+                    let criteria = { _creador : req.state['session-id'].usuario };
+                    // Buscamos con paginación
+                    let torneos = await torneoRepo.searchPg(pg, criteria).then(torneos => {
+                        pgUltima = torneos.total/2;
+                        if (pgUltima % 2 > 0 ){
+                            pgUltima = Math.trunc(pgUltima);
+                            pgUltima = pgUltima+1;
+                        }
+                        return torneos;
+                    });
+                    // Transformar a objetos de nuestro modelo
+                    torneos = module.exports.getTorneos(torneos);
+                    // Cambiar el estilo de las fechas
+                    torneos.forEach(torneo => {
                         torneo.inicioInscripcion = module.exports.getFechaBonita(torneo.inicioInscripcion);
                         torneo.finInscripcion = module.exports.getFechaBonita(torneo.finInscripcion);
-                    })
-
-
-                    var paginas = [];
-                    for( i=1; i <= pgUltima; i++){
-                        if ( i == pg ){
-                            paginas.push({valor: i , clase : "uk-active" });
+                    });
+                    // Paginación
+                    let paginas = [];
+                    for (let i=1; i <= pgUltima; i++){
+                        if ( i === pg ){
+                            paginas.push({valor: i , clase: "uk-active" });
                         } else {
                             paginas.push({valor: i});
                         }
                     }
-                    
+                    // Obtenemos la vista
                     return h.view('torneos/mistorneos',
                         {
-                            torneos: totalTorneos,
-                            usuarioAutenticado: req.auth.credentials,
-                            paginas : paginas
+                            torneos,
+                            usuarioAutenticado: req.state['session-id'].usuario,
+                            paginas
                         },
                         { layout: 'base'} );
                 }
