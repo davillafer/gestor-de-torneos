@@ -21,6 +21,12 @@ module.exports = {
             return `${fecha.getDate()}/${fecha.getMonth()+1}/${fecha.getFullYear()}`;
         }
     },
+    getFechaHoraBonita(fecha){
+        if(!fecha instanceof Date){
+            return fecha;
+        }
+        return `${fecha.getDate()}/${fecha.getMonth()+1}/${fecha.getFullYear()}-${fecha.getHours()}:${fecha.getMinutes()}`;
+    },
     getTorneos(list) {
         let aux = [];
         list.forEach(t => {
@@ -172,6 +178,8 @@ module.exports = {
                                 let equipos = torneo.equipos.slice();
                                 let equiposLength = equipos.length;
                                 let equipoAnterior = undefined;
+                                fecha = torneo.inicioInscripcion;
+                                fecha.setHours(12);
                                 for (let i = 0; i < equiposLength; i++) {
                                     let number = Math.floor(Math.random() * equipos.length);
                                     if (equipoAnterior === undefined) {
@@ -185,7 +193,8 @@ module.exports = {
                                         let partido = {
                                             equipoLocal: equipoAnterior,
                                             equipoVisitante: equipos[number],
-                                            resultado : resultado
+                                            resultado : resultado,
+                                            fecha : module.exports.getFechaHoraBonita(fecha),
                                         };
                                         equipoAnterior = undefined;
                                         equipos.splice(number, 1);
@@ -194,6 +203,7 @@ module.exports = {
                                 }
                                 let columna = torneo.partidos.length;
                                 while (columna > 1) {
+                                    fecha.setDate(fecha.getDate() +1 );
                                     let  elementosColumna = columna;
                                     columna = 0;
                                     for (let i = 0; i < elementosColumna; i+=2) {
@@ -204,7 +214,7 @@ module.exports = {
                                         let partido = {
                                             equipoLocal: "Por Determinar",
                                             equipoVisitante: "Por Determinar",
-                                            resultado : resultado
+                                            fecha : module.exports.getFechaHoraBonita(fecha),
                                         };
 
                                         columna++;
