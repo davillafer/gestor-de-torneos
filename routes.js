@@ -55,7 +55,41 @@ module.exports = {
         torneoRepo = server.methods.getTorneoRepo();
 
         server.route([
-            /* ELIMINAR TORNEOS */
+            /* DESAPUNTARSE DE UN TORNEO */
+            {
+                method: 'GET',
+                path: '/torneos/{id}/abandonar',
+                options: {
+                    auth: 'auth-registrado'
+                },
+                handler: async (req, h) => {
+                  
+                    let criterio = { "_id": ObjectID(req.params.id)};
+                    let torneoObjetivo = null;       
+                    let result =  null; 
+                    await torneoRepo.search(criterio).then((torneos) => {
+                        if (torneos) {
+                            torneoObjetivo =module.exports.getTorneo(torneos[0])
+                        } else {
+                            result = h.redirect('/torneos/inscrito?mensaje=El torneo no existe&tipoMensaje=danger');
+                        }
+                    });
+                   
+                   //desapuntarse
+                    let done = torneoObjetivo.desInscribir(req.auth.credentials);
+                   //
+                   result = done ? h.redirect('/torneos?mensaje=Se te ha desapuntado del torneo&tipoMensaje=success') :h.redirect('/torneos?mensaje=No se te ha podido desapuntar&tipoMensaje=danger');
+
+                    await torneoRepo.update(torneoObjetivo).then((res) => {                                                       
+                        if(!res) // si fue mal
+                            result = h.redirect('/torneos?mensaje=No se ha podido desapuntarse&tipoMensaje=danger');
+                        // si salió bien devolverá lo que ya viene de la 'lógica';
+                    });
+                    return result;
+
+                }
+            },
+            /* CANCELAR TORNEOS */
             {
                 method: 'GET',
                 path: '/torneos/{id}/eliminar',

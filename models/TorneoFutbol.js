@@ -129,8 +129,15 @@ module.exports =  class TorneoFutbol {
         equipos.push(equipo_id);            
     }
 
-    desInscribir(equipo){
-        
+    desInscribir(equipo){       
+        for (let index = 0; index < this._equipos.length; index++) {            
+            if (this._equipos[index] == equipo && new Date() < this._finInscripcion )
+            {
+                this._equipos.splice(index,1);          
+                return true;                                                                 
+            }
+        }
+        return false;
     }
     
     siguientePartido(){
