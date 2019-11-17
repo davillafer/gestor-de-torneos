@@ -749,6 +749,54 @@ module.exports = {
                     });
                     // Transformar a objetos de nuestro modelo
                     torneo = module.exports.getTorneo(torneo);
+                    let claves = Object.keys(req.payload)
+                    let equipoLocal = claves[0];
+                    let equipoVisitante = claves[1];
+                    let golesEquipoLocal = parseInt(req.payload[claves[0]]);
+                    let golesEquipoVisitante = parseInt(req.payload[claves[1]]);
+
+                    let index = 0;
+
+                    for (let i=0; i < torneo.partidos.length; i++){
+                        if (torneo.partidos[i].equipoLocal == equipoLocal && torneo.partidos[i].equipoVisitante == equipoVisitante){
+                            torneo.partidos[i].resultado.golesEquipoLocal = golesEquipoLocal;
+                            torneo.partidos[i].resultado.golesEquipoVisitante = golesEquipoVisitante;
+                            index = i;
+                        }
+                    }
+
+                    let newIndex = Math.ceil((0 + 1) / 2) + Math.floor(torneo.partidos.length / 2);
+
+                    if (newIndex > index){
+                        if (index % 2 == 1){
+                            if (golesEquipoLocal > golesEquipoVisitante){
+                                torneo.partidos[newIndex].equipoVisitante = equipoLocal
+                            } else {
+                                torneo.partidos[newIndex].equipoVisitante = equipoVisitante
+                            }
+                        } else {
+                            if (golesEquipoLocal > golesEquipoVisitante){
+                                torneo.partidos[newIndex].equipoLocal = equipoLocal
+                            } else {
+                                torneo.partidos[newIndex].equipoLocal = equipoVisitante
+                            }
+                        }
+                    }
+                    // Modificamos el usuario
+                    let respuesta = null;
+                    await torneoRepo.update(torneo).then((id) => {
+                        if (id == null) {
+                            respuesta =  h.redirect('/torneos/' + req.params.id + "/ver")
+                        } else {
+                            respuesta = h.redirect('/torneos/' + req.params.id + "/ver");
+                        }
+                    });
+
+                    return respuesta;
+
+
+
+
                 }
             }
         ])
