@@ -670,6 +670,21 @@ module.exports = {
                         },
                         {layout: 'base'});
                 }
+            },
+            {
+                method: 'POST',
+                path: '/torneos/{id}/resultado',
+                options: {
+                    auth: 'auth-registrado'
+                },
+                handler: async (req, h) => {
+                    let criteria = {"_id": require("mongodb").ObjectID(req.params.id)};
+                    let torneo = await torneoRepo.search(criteria).then(torneos => {
+                        return torneos[0];
+                    });
+                    // Transformar a objetos de nuestro modelo
+                    torneo = module.exports.getTorneo(torneo);
+                }
             }
         ])
     }

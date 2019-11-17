@@ -78,25 +78,29 @@
         </div>
     </div>
 </section>
-{{/if}}
 <script>
-let match = undefined;
-const code = '<div class="uk-container"> <h1 class="uk-heading-small uk-align-center">Resultados</h1> <legend class="uk-legend uk-text-center">!TEAMS!</legend> <form method="POST" action="/" class="uk-grid-small" uk-grid><div class="uk-width-1-2"> <input class="uk-input" type="number" min="0" required> </div> <div class="uk-width-1-2"> <input class="uk-input" min="0" type="number" required> </div> <div class="uk-width-1-1 uk-margin-bottom"> <button class="uk-button uk-button-default">Guardar</button> </div> </form> </div>'
-UIkit.util.on('.tournament-bracket__match', 'click', function (e) {
-    match = e.path.find(el => el.id.includes('!-!')).id;
-    if(!!match){
-        if(match.toLowerCase().includes('determinar')){
-            match = undefined;
-            return;
+    let match = undefined;
+    const code = '<div class="uk-container"> <h1 class="uk-heading-small uk-align-center">Resultados</h1> <legend class="uk-legend uk-text-center">!TEAMS!</legend> <form method="POST" action="/torneos/{{torneo._id}}/resultado" class="uk-grid-small" uk-grid><div class="uk-width-1-2"> <input class="uk-input" type="number" min="0" required name="!NAME1!"> </div> <div class="uk-width-1-2"> <input name="!NAME2!" class="uk-input" min="0" type="number" required> </div> <div class="uk-width-1-1 uk-margin-bottom"> <button class="uk-button uk-button-default">Guardar</button> </div> </form> </div>'
+    UIkit.util.on('.tournament-bracket__match', 'click', function (e) {
+        match = e.path.find(el => el.id.includes('!-!')).id;
+        if(!!match){
+            if(match.toLowerCase().includes('determinar')){
+                match = undefined;
+                return;
+            }
+            e.preventDefault();
+            e.target.blur();
+            var teams = match.split('!-!')
+            var modal = UIkit.modal.dialog(code.replace('!TEAMS!',teams[0]+' - '+teams[1]).replace('!NAME1!',teams[0]).replace('!NAME2!',teams[1]));
+            modal.$el.addEventListener("submit", function (event) {
+                    var local = parseInt(event.target[0].value);
+                    var visitante =parseInt(event.target[1].value);
+                    if(local === visitante){
+                        UIkit.notification({message: 'Un equipo debe ser ganador', status: 'danger'})
+                        event.preventDefault();
+                    }
+            }, false);
         }
-        e.preventDefault();
-        e.target.blur();
-        var teams = match.split('!-!')
-        UIkit.modal.dialog(code.replace('!TEAMS!',teams[0]+' - '+teams[1]));
-        var form  = document.getElementsByTagName('form')[0];
-        form.addEventListener("submit", function (event) {
-                event.preventDefault();
-        }, false);
-    }
-});
-</script>
+    });
+</script>    
+{{/if}}
