@@ -34,6 +34,15 @@ module.exports = {
             aux._id = t._id;
         return aux;
     },
+    getUsuarioIdentificado(req){
+        if(req.auth.credentials !== null){
+            return req.auth.credentials;
+        }else if(req.state['session-id'] != null && req.state['session-id'].usuario !=""){
+            return req.state['session-id'].usuario;
+        }else{
+            return null;
+        }
+    },
     register: async (server, options) => {
         miserver = server;        
         equipoRepo = server.methods.getEquipoRepo();
@@ -119,11 +128,11 @@ module.exports = {
                             return h.redirect('/torneos?mensaje=Ya se ha unido al torneo&tipoMensaje=danger');
                     });
                     // Comprobar si aun pueden inscribirse
-                    let ahora = new Date();
-                    if (ahora < torneo.finInscripcion)
+                    let ahora = module.exports.getFechaBonita(new Date());
+                    if (ahora < torneo.finInscripcion || ahora < torneo.inicioInscripcion)
                         torneo.equipos.push(req.state["session-id"].usuario);
                     else
-                        return h.redirect('/torneos?mensaje=Ya no permite inscripciones el torneo&tipoMensaje=danger');
+                        return h.redirect('/torneos?mensaje=No permite inscripciones el torneo&tipoMensaje=danger');
                     // Actualizar bd
                     let result = null;
                     await torneoRepo.update(torneo).then((res) => {
@@ -364,7 +373,7 @@ module.exports = {
                 },
                 handler: async (req, h) => {
                     // Obtenemos la información del usuario
-                    let user = await equipoRepo.search({ 'usuario': req.state['session-id'].usuario }).then( async result => {
+                    let user = await equipoRepo.search({ 'usuario': req.auth.credentials }).then( async result => {
                         if (result) {
                             return result[0];
                         } else {
@@ -376,7 +385,7 @@ module.exports = {
                         return h.view('usuario/perfil',
                             {
                                 user,
-                                usuarioAutenticado: req.state["session-id"].usuario
+                                usuarioAutenticado: req.auth.credentials
                             },
                             { layout: 'base'});
                     } else {
@@ -425,7 +434,7 @@ module.exports = {
                         {
                             categoria,
                             numEquipos,
-                            usuarioAutenticado: req.state['session-id'].usuario,
+                            usuarioAutenticado: req.auth.credentials,
                         },
                         { layout: 'base'}
                     );
@@ -453,7 +462,7 @@ module.exports = {
                     torneo.inicioInscripcion = empieza;
                     torneo.equipos = [];
                     torneo.partidos = [];
-                    torneo.creador = req.state['session-id'].usuario;
+                    torneo.creador = req.auth.credentials;
                     // Guardamos el torneo en la bd
                     let respuesta = null;
                     await torneoRepo.save(torneo).then((id) => {
@@ -483,7 +492,7 @@ module.exports = {
                         pg = 1;
                     }
                     // Criterio de búsqueda
-                    let criteria = { _creador : req.state['session-id'].usuario };
+                    let criteria = { _creador : req.auth.credentials };
                     // Buscamos con paginación
                     let torneos = await torneoRepo.searchPg(pg, criteria).then(torneos => {
                         pgUltima = torneos.total/2;
@@ -513,7 +522,7 @@ module.exports = {
                     return h.view('torneos/mistorneos',
                     {
                         torneos,
-                        usuarioAutenticado: req.state['session-id'].usuario,
+                        usuarioAutenticado: req.auth.credentials,
                         paginas
                     },
                     { layout: 'base'} );
@@ -544,14 +553,14 @@ module.exports = {
                         torneo.inicioInscripcion = module.exports.getFechaBonita(torneo.inicioInscripcion);
                         torneo.finInscripcion= module.exports.getFechaBonita(torneo.finInscripcion);
                         torneo.disponible = true;
-                        let ahora = new Date();
-                        if (ahora > torneo.finInscripcion){
+                        let ahora = module.exports.getFechaBonita(new Date());
+                        if (ahora > torneo.finInscripcion || ahora < torneo.inicioInscripcion){
                             torneo.disponible = false;
                         }
-                        if(req.state['session-id'].usuario !== null){
+                        if(module.exports.getUsuarioIdentificado(req) !== null){
                             torneo.unido = false;
                             torneo.equipos.forEach(equipo => {
-                                if(equipo === req.state['session-id'].usuario)
+                                if(equipo == module.exports.getUsuarioIdentificado(req))
                                 {
                                     torneo.unido = true;
                                 }
@@ -564,7 +573,7 @@ module.exports = {
                     return h.view('torneos/torneos',
                     {
                         torneos,
-                        usuarioAutenticado: req.state['session-id'].usuario
+                        usuarioAutenticado: module.exports.getUsuarioIdentificado(req)
                     },
                     { layout: 'base'});
                 }
@@ -584,7 +593,7 @@ module.exports = {
                 handler: async (req, h) => {
                     return h.view('index',
                     {
-                        usuarioAutenticado: req.state['session-id'].usuario
+                        usuarioAutenticado: module.exports.getUsuarioIdentificado(req)
                     },
                     { layout: 'base'});
                 }
