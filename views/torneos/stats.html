@@ -1,0 +1,26 @@
+<section class="uk-section">
+    <div class="uk-container">
+        <div class="uk-overflow-auto">
+            <table class="uk-table uk-table-hover uk-table-middle uk-table-divider">
+                <thead>
+                <tr>
+                    <th class="uk-table-expand">Equipo</th>
+                    <th class="uk-table-expand">Goles a favor</th>
+                    <th class="uk-table-expand">Goles en contra</th>
+                    <th class="uk-width-small">Diferencia de goles</th>
+                </tr>
+                </thead>
+                <tbody>
+                {{#each equipos}}
+                <tr>
+                    <td>{{ nombre }}</td>
+                    <td>{{ golesFavor }}</td>
+                    <td>{{ golesContra }}</td>
+                    <td>{{ diferencia }}</td>
+                </tr>
+                {{/each}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
