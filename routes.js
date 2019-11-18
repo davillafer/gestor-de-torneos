@@ -654,8 +654,10 @@ module.exports = {
                 handler: async (req, h) => {
                     // Criterio de búsqueda
                     let criteria = {};
-                    if (req.query.criteria != null ){
-                        criteria = { "nombre" : {$regex : ".*"+req.query.criterio+".*"}};
+                    if (req.query.criterio != null ){
+                        criteria = { $or:[{ "_nombre" : {$regex : ".*"+req.query.criterio+".*"}},
+                        {"_creador" : {$regex : ".*"+req.query.criterio+".*"}}
+                    ] };
                     }
                     criteria._visibilidad = 'public';
                     // Buscamos el torneo
