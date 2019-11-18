@@ -73,12 +73,12 @@ module.exports =  class TorneoFutbol {
         this._finInscripcion = value;
     }
 
-    get inicioInscripcion() {
-        return this._inicioInscripcion;
+    get inicioTorneo() {
+        return this._inicioTorneo;
     }
 
-    set inicioInscripcion(value) {
-        this._inicioInscripcion = value;
+    set inicioTorneo(value) {
+        this._inicioTorneo = value;
     }
 
     get partidos() {

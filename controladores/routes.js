@@ -570,9 +570,9 @@ module.exports = {
                     // Creamos el torneo
                     let torneo = futbolFactory.crearTorneo();
                     // Obtener valores del usuarios
-                    let fin = new Date(req.payload.fecha);
                     let empieza = new Date(req.payload.fecha);
-                    empieza.setDate(empieza.getDate() - 10);
+                    let fin = new Date(req.payload.fecha);
+                    fin.setDate(empieza.getDate() - 10);
                     torneo.nombre = req.payload.nombre;
                     torneo.numEquipos = req.payload.nEquipos;
                     torneo.categoria = req.payload.categoria;
