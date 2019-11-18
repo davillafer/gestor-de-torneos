@@ -1,8 +1,8 @@
-const categorias = require('./models/Categoria');
+const categorias = require('./gest_torneos/model/Categoria');
 const ObjectID = require("mongodb").ObjectID;
-const FutbolFactory = require('./factory/FutbolFactory');
+const FutbolFactory = require('./gest_torneos/model/factory/FutbolFactory');
 const futbolFactory = new FutbolFactory();
-const TorneoFutbol = require('./models/TorneoFutbol');
+const TorneoFutbol = require('./gest_torneos/model/TorneoFutbol');
 const dotenv = require('dotenv');
 dotenv.config();
 

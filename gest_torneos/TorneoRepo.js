@@ -1,5 +1,5 @@
-const AbsRepo = require('./AbsRepo');
-const FutbolFactory = require('../factory/FutbolFactory');
+const AbsRepo = require('../repositories/AbsRepo');
+const FutbolFactory = require('./model/factory/FutbolFactory');
 module.exports =  class TorneoRepo extends AbsRepo{
     getCollection(){
         return 'Torneos';

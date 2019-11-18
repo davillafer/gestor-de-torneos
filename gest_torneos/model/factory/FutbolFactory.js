@@ -1,6 +1,6 @@
 var AbsFactory = require('./AbsFactory');
-var PartidoFutbol = require('../models/PartidoFutbol');
-var TorneoFutbol  = require('../models/TorneoFutbol');
+var PartidoFutbol = require('../PartidoFutbol');
+var TorneoFutbol  = require('../TorneoFutbol');
 
 module.exports = class FutbolFactory extends AbsFactory {
 

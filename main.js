@@ -4,8 +4,8 @@ const Inert = require('@hapi/inert');
 const Vision = require('@hapi/vision');
 const Cookie = require('@hapi/cookie');
 const routes = require("./routes.js");
-const EquipoRepo = require("./repositories/EquipoRepo");
-const TorneoRepo = require("./repositories/TorneoRepo");
+const EquipoRepo = require("./gest_usuarios/EquipoRepo");
+const TorneoRepo = require("./gest_torneos/TorneoRepo");
 const dotenv = require('dotenv');
 dotenv.config();
 // Servidor
@@ -82,8 +82,8 @@ const iniciarServer = async () => {
                 html: require('handlebars')
             },
             relativeTo: __dirname,
-            path: './views',
-            layoutPath: './views/layout',
+            path: './visualizacion/views',
+            layoutPath: './visualizacion/views/layout',
             context : {
                 sitioWeb: "wallapep"
             }

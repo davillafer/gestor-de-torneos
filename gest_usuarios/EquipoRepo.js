@@ -1,5 +1,5 @@
-const AbsRepo = require('./AbsRepo')
-const Equipo = require('../models/Equipo')
+const AbsRepo = require('../repositories/AbsRepo')
+const Equipo = require('./Model/Equipo')
 module.exports =  class EquipoRepo extends AbsRepo{
     getCollection(){
         return 'Equipos';
