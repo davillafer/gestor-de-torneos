@@ -801,9 +801,14 @@ module.exports = {
                         }
                     }
 
-                    let newIndex = Math.ceil((0 + 1) / 2) + Math.floor(torneo.partidos.length / 2);
 
-                    if (newIndex > index){
+                    let newIndex = Math.ceil((index + 1) / 2) + Math.floor(torneo.partidos.length / 2);
+
+                    console.log(index)
+                    console.log(newIndex)
+
+                    if (newIndex < torneo.partidos.length){
+                        console.log("asd");
                         if (index % 2 == 1){
                             if (golesEquipoLocal > golesEquipoVisitante){
                                 torneo.partidos[newIndex].equipoVisitante = equipoLocal
