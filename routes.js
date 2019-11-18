@@ -205,7 +205,8 @@ module.exports = {
                     // Partidos del torneo
                     let partidos = [];
                     if (torneo.partidos.length === 0){
-                        fechaDeInicioSuperada = true;
+                        let currentDate = new Date();
+                        fechaDeInicioSuperada = currentDate.getTime() > torneo.inicioInscripcion.getTime();
                         if (fechaDeInicioSuperada) {
                             if (torneo.equipos.length != 0){
                                 let equipos = torneo.equipos.slice();
