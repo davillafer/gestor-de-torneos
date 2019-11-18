@@ -139,13 +139,4 @@ module.exports =  class TorneoFutbol {
         }
         return false;
     }
-    
-    siguientePartido(){
-        
-    }
-
-    generarBracket(){
-        
-    }
-
 }

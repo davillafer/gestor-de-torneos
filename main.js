@@ -11,7 +11,7 @@ dotenv.config();
 // Servidor
 const server = Hapi.server({
     port: process.env.PORT, // USAR EL .ENV
-    host: 'localhost',
+    //host: 'localhost',
 });
 
 
