@@ -1,7 +1,7 @@
 module.exports =  class TorneoFutbol {
 
     // No hay constructor overloading
-    constructor(nombre, numEquipos, finInscripcion, inicioInscripcion, partidos, equipos, creador, categoria, visibilidad) {
+    constructor(nombre, numEquipos, finInscripcion, inicioTorneo, partidos, equipos, creador, categoria, visibilidad) {
         // _id da problemas con mongo si no lo genera automáticamnete
         if (typeof nombre !== 'undefined')
             this._nombre = nombre;
@@ -18,10 +18,10 @@ module.exports =  class TorneoFutbol {
         else
             this._finInscripcion = null;
 
-        if (typeof inicioInscripcion !== 'undefined')
-            this._inicioInscripcion = inicioInscripcion;
+        if (typeof inicioTorneo !== 'undefined')
+            this._inicioTorneo = inicioTorneo;
         else
-            this._inicioInscripcion = null;
+            this._inicioTorneo = null;
 
         if (typeof partidos !== 'undefined')
             this._partidos = partidos;
