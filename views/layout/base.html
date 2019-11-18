@@ -51,7 +51,6 @@
                 </a>
             </div>
 
-            {{#if usuarioAutenticado}}
             <div class="uk-navbar-right">
                 <!-- uk-visible@m Lo visualiza en pantallas más pequeñas de m-->
                 <ul class="uk-navbar-nav uk-visible@m">
@@ -62,6 +61,8 @@
                                      </span> Torneos
                                 </a>
                             </li>
+
+                    {{#if usuarioAutenticado}}
                     <li>
                         <a href="/torneos/inscrito">
                             <span data-uk-icon="heart"

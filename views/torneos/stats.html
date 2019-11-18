@@ -1,5 +1,9 @@
 <section class="uk-section">
     <div class="uk-container">
+        <h1 class = "uk-heading-medium uk-align-center">{{torneo.nombre}}</h1>
+        <p>Creado por {{torneo.creador}}</p>
+        <p>Categoria: <b>{{torneo.categoria}}</b></p>
+        <a class="uk-button uk-button-default" href="/torneos/{{torneo._id}}/ver">Bracket</a>
         <div class="uk-overflow-auto">
             <table class="uk-table uk-table-hover uk-table-middle uk-table-divider">
                 <thead>

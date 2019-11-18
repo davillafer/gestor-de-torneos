@@ -25,6 +25,9 @@
 <section class="uk-section bracket">
     <div class="uk-container">
         <h1 class = "uk-heading-medium uk-align-center">{{torneo.nombre}}</h1>
+        <p>Creado por {{torneo.creador}}</p>
+        <p>Categoria: <b>{{torneo.categoria}}</b></p>
+        <a class="uk-button uk-button-default" href="/torneos/{{torneo._id}}/stats">Estadisticas</a>
         <div class = "uk-overflow-auto">
             <div class="container">
                 <div class="tournament-bracket tournament-bracket--rounded">
@@ -81,9 +84,13 @@
 <script>
     let match = undefined;
     const code = '<div class="uk-container"> <h1 class="uk-heading-small uk-align-center">Resultados</h1> <legend class="uk-legend uk-text-center">!TEAMS!</legend> <form method="POST" action="/torneos/{{torneo._id}}/resultado" class="uk-grid-small" uk-grid><div class="uk-width-1-2"> <input class="uk-input" type="number" min="0" required name="!NAME1!"> </div> <div class="uk-width-1-2"> <input name="!NAME2!" class="uk-input" min="0" type="number" required> </div> <div class="uk-width-1-1 uk-margin-bottom"> <button class="uk-button uk-button-default">Guardar</button> </div> </form> </div>'
+    const isOwner = '{{isOwner}}';
     UIkit.util.on('.tournament-bracket__match', 'click', function (e) {
         match = e.target.closest('div').id;
-        if(!!match){e
+        if(!!match){
+            if(isOwner != 'true'){
+                return;
+            }
             if(match.toLowerCase().includes('determinar')){
                 match = undefined;
                 return;
