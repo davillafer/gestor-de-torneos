@@ -37,7 +37,7 @@ module.exports = {
         return aux;
     },
     getTorneo(t) {
-        let aux = new TorneoFutbol(t._nombre, t._numEquipos, t._finInscripcion, t._inicioInscripcion, t._partidos, t._equipos, t._creador, t._categoria, t._visibilidad);
+        let aux = new TorneoFutbol(t._nombre, t._numEquipos, t._finInscripcion, t._inicioTorneo, t._partidos, t._equipos, t._creador, t._categoria, t._visibilidad);
         if (t._id)
             aux._id = t._id;
         return aux;
@@ -131,7 +131,7 @@ module.exports = {
                     // Torneos en los que el usuario está inscrito
                     let torneos = [];
                     await totalTorneos.forEach(torneo => {
-                        torneo.inicioInscripcion = module.exports.getFechaBonita(torneo.inicioInscripcion);
+                        torneo.inicioTorneo = module.exports.getFechaBonita(torneo.inicioTorneo);
                         torneo.finInscripcion = module.exports.getFechaBonita(torneo.finInscripcion);
                         torneo.equipos.forEach(equipo => {
                             if (equipo === req.state["session-id"].usuario)
@@ -206,13 +206,13 @@ module.exports = {
                     let partidos = [];
                     if (torneo.partidos.length === 0){
                         let currentDate = new Date();
-                        fechaDeInicioSuperada = currentDate.getTime() > torneo.inicioInscripcion.getTime();
+                        fechaDeInicioSuperada = currentDate.getTime() > torneo.inicioTorneo.getTime();
                         if (fechaDeInicioSuperada) {
                             if (torneo.equipos.length != 0){
                                 let equipos = torneo.equipos.slice();
                                 let equiposLength = equipos.length;
                                 let equipoAnterior = undefined;
-                                fecha = torneo.inicioInscripcion;
+                                fecha = torneo.inicioTorneo;
                                 fecha.setHours(12);
                                 for (let i = 0; i < equiposLength; i++) {
                                     let number = Math.floor(Math.random() * equipos.length);
@@ -342,7 +342,7 @@ module.exports = {
                             }
                         }
                     }
-                    torneo.inicioInscripcion = module.exports.getFechaHoraBonita(torneo.inicioInscripcion)
+                    torneo.inicioTorneo = module.exports.getFechaHoraBonita(torneo.inicioTorneo)
                     return h.view('torneos/ver',
                         {
                             torneo: torneo,
@@ -578,7 +578,7 @@ module.exports = {
                     torneo.categoria = req.payload.categoria;
                     torneo.finInscripcion = fin;
                     torneo.visibilidad = req.payload.visibilidad;
-                    torneo.inicioInscripcion = empieza;
+                    torneo.inicioTorneo = empieza;
                     torneo.equipos = [];
                     torneo.partidos = [];
                     torneo.creador = req.auth.credentials;
@@ -625,7 +625,7 @@ module.exports = {
                     torneos = module.exports.getTorneos(torneos);
                     // Cambiar el estilo de las fechas
                     torneos.forEach(torneo => {
-                        torneo.inicioInscripcion = module.exports.getFechaBonita(torneo.inicioInscripcion);
+                        torneo.inicioTorneo = module.exports.getFechaBonita(torneo.inicioTorneo);
                         torneo.finInscripcion = module.exports.getFechaBonita(torneo.finInscripcion);
                     });
                     // Paginación
@@ -671,11 +671,11 @@ module.exports = {
                         if (torneo.nombre.length > 25){
                             torneo.nombre = torneo.nombre.substring(0, 25) + "...";
                         }
-                        torneo.inicioInscripcion = module.exports.getFechaBonita(torneo.inicioInscripcion);
+                        torneo.inicioTorneo = module.exports.getFechaBonita(torneo.inicioTorneo);
                         torneo.finInscripcion= module.exports.getFechaBonita(torneo.finInscripcion);
                         torneo.disponible = true;
                         let ahora = module.exports.getFechaBonita(new Date());
-                        if (ahora > torneo.finInscripcion || ahora < torneo.inicioInscripcion){
+                        if (ahora > torneo.finInscripcion || ahora < torneo.inicioTorneo){
                             torneo.disponible = false;
                         }
                         if(module.exports.getUsuarioIdentificado(req) !== null){
