@@ -733,9 +733,6 @@ module.exports = {
                     // Transformar a objetos de nuestro modelo
                     torneo = module.exports.getTorneo(torneo);
 
-                    // TODO: transformar los equipos al modelo y cambiar las stats
-                    // let equipos = module.exports.getEquipos(torneo.equipos);
-
                     // Calcular stats
                     let equipos = [];
                     torneo.equipos.forEach(equipo => {
@@ -753,7 +750,6 @@ module.exports = {
                                 }
                             }
                         });
-                        // TODO: foreach partido buscar el equipo y añadir a los counters
                         let diferencia = golesFavor - golesContra;
                         equipos.push({
                             nombre: equipo,
