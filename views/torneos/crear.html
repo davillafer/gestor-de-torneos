@@ -3,10 +3,12 @@
         <form method="post" action="/torneos/crear" >
             <div class="uk-margin">
                 <div class="uk-inline uk-width-1-1">
+                    <label class="uk-form-label">Nombre:</label>
                     <input class="uk-input" name="nombre" placeholder="Nombre del torneo" type="text" required>
                 </div>
             </div>
             <div class="uk-margin">
+                <label class="uk-form-label">Número de equipos máximo:</label>
                 <select class="uk-select" name="nEquipos" required>
                     {{#each numEquipos}}
                     <option>{{ this }}</option>
@@ -14,6 +16,7 @@
                 </select>
             </div>
             <div class="uk-margin">
+                <label class="uk-form-label">Categoría:</label>
                 <select class="uk-select" name="categoria" required>
                     {{#each categoria}}
                     <option>{{ this }}</option>
@@ -21,6 +24,7 @@
                 </select>
             </div>
             <div class="uk-margin">
+                <label class="uk-form-label">Fecha inicio torneo:</label>
                 <div class="uk-inline uk-width-1-1">
                     <span class="uk-form-icon" uk-icon="icon: calendar"></span>
                     <input class="uk-input" name="fecha" placeholder="Día de inicio del torneo" type="date" required>

@@ -823,4 +823,4 @@ module.exports = {
             }
         ])
     }
-}
+};
