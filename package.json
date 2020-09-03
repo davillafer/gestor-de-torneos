@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "dependencies": {
     "@hapi/cookie": "^10.1.2",
-    "@hapi/hapi": "^18.4.0",
+    "@hapi/hapi": "^19.1.1",
     "@hapi/inert": "^5.2.2",
     "@hapi/vision": "^5.5.4",
     "dotenv": "^8.2.0",
